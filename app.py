@@ -17,22 +17,28 @@ from flask import Flask, jsonify, request
 
 # Telebot
 bot = telebot.TeleBot(token, threaded=False)
-bot.remove_webhook()
-bot.set_webhook(url='https://paypal-telegram-fiverr-bot.herokuapp.com/setwebhook')
 
 #Mongo DB
 cluster = MongoClient('mongodb+srv://Amir:2LSCfSNcwAz9x3!@cluster0.jxsw1.mongodb.net/myFirstDatabase?retryWrites=true&w=majority')
 db = cluster['telegram']
 collection = db['user']
+
+# Paypal python sdk
+paypalrestsdk.configure({
+	"mode": "sandbox", # sandbox or live
+	"client_id": "AW7Q6ChzzOnd5wa8OuYbiP5RiaqQ6tumVR7UTlMLaDIF_FXRhxo77BaNmjgQfKN6GBLK5c2rDHiijpHv",
+	"client_secret": "EBBmQczfJM6WrweaUE-NDMOxpBn__GH_RXtXQB1nwt8AN6doaa7MBEYuf3ok6EREj8AsrL7Eg7vSE4wM",
+})
+
 # Flask
 app = Flask(__name__)
 app.config.from_object(__name__)
 
-@app.route('/setwebhook', methods=['POST'])
+@app.route('/bot', methods=['POST'])
 def webhook():
 	update = telebot.types.Update.de_json(request.stream.read().decode('utf-8'))
 	bot.process_new_updates([update])
-	return 'ok', 200
+	return '!', 200
 
 @app.route('/payment/execute')
 def execute():
@@ -46,16 +52,10 @@ def execute():
 		print(payment.error)
 
 @app.route('/')
-def index():
-    return "<h1>Welcome to our server !!</h1>"
-
-
-# Paypal python sdk
-paypalrestsdk.configure({
-	"mode": "sandbox", # sandbox or live
-	"client_id": "AW7Q6ChzzOnd5wa8OuYbiP5RiaqQ6tumVR7UTlMLaDIF_FXRhxo77BaNmjgQfKN6GBLK5c2rDHiijpHv",
-	"client_secret": "EBBmQczfJM6WrweaUE-NDMOxpBn__GH_RXtXQB1nwt8AN6doaa7MBEYuf3ok6EREj8AsrL7Eg7vSE4wM",
-})
+def webhook():
+	bot.remove_webhook()
+	bot.set_webhook(url='https://paypal-telegram-fiverr-bot.herokuapp.com/bot')
+    return "?", 200
 
 
 def newId():
