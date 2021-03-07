@@ -33,6 +33,7 @@ def webhook():
 	update = telebot.types.Update.de_json(request.stream.read().decode('utf-8'))
 	bot.process_new_updates([update])
 	return 'ok', 200
+
 @app.route('/payment/execute')
 def execute():
 	payment_id = request.args['paymentId']
@@ -44,7 +45,9 @@ def execute():
 	else:
 		print(payment.error)
 
-
+@app.route('/')
+def index():
+    return "<h1>Welcome to our server !!</h1>"
 
 
 # Paypal python sdk
