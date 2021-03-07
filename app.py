@@ -55,7 +55,7 @@ def execute():
 def webhook():
 	bot.remove_webhook()
 	bot.set_webhook(url='https://paypal-telegram-fiverr-bot.herokuapp.com/bot')
-    return "?", 200
+	return '?', 200
 
 
 def newId():
