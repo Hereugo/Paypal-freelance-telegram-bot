@@ -3,7 +3,7 @@ from random import *
 
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-from config import token, messages, url, secret
+from config import token, messages
 from functions import Map
 
 import pymongo
@@ -18,7 +18,7 @@ from flask import Flask, jsonify, request
 # Telebot
 bot = telebot.TeleBot(token, threaded=False)
 bot.remove_webhook()
-bot.set_webhook(url='https://paypal-telegram-fiverr-bot.herokuapp.com/init')
+bot.set_webhook(url='https://paypal-telegram-fiverr-bot.herokuapp.com/setwebhook')
 
 #Mongo DB
 cluster = MongoClient('mongodb+srv://Amir:2LSCfSNcwAz9x3!@cluster0.jxsw1.mongodb.net/myFirstDatabase?retryWrites=true&w=majority')
@@ -28,7 +28,7 @@ collection = db['user']
 app = Flask(__name__)
 app.config.from_object(__name__)
 
-@app.route('/', methods=['POST'])
+@app.route('/setwebhook', methods=['POST'])
 def webhook():
 	update = telebot.types.Update.de_json(request.stream.read().decode('utf-8'))
 	bot.process_new_updates([update])
@@ -43,6 +43,8 @@ def execute():
 		print('Payment was successful')
 	else:
 		print(payment.error)
+
+
 
 
 # Paypal python sdk
@@ -426,4 +428,4 @@ def callback_query(call):
 	else:
 		method(call.message, value)
 
-app.run()
+app.run(host="0.0.0.0", port=os.environ.get('PORT', 80))

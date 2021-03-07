@@ -1,8 +1,6 @@
 from functions import Map
 
 token = "1272925344:AAFO3V-DSpEcMYkfL8oMZ38Ei7JlAFIXr-o"
-secret = 'oaisdj3r091aodfebaz'
-url = '127.0.0.1:8443/'
 
 # PATH SYSTEM
 
