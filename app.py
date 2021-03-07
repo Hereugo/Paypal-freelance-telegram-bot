@@ -35,7 +35,7 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 
 @app.route('/bot', methods=['POST'])
-def webhook():
+def botting():
 	update = telebot.types.Update.de_json(request.stream.read().decode('utf-8'))
 	bot.process_new_updates([update])
 	return '!', 200
