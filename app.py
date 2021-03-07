@@ -1,4 +1,5 @@
 import re
+import os
 from random import *
 
 import telebot
@@ -431,4 +432,4 @@ def callback_query(call):
 	else:
 		method(call.message, value)
 
-app.run()
+app.run(host="0.0.0.0", port=os.environ.get('PORT', 80))
