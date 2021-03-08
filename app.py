@@ -52,11 +52,10 @@ def execute():
 	if payment.execute({'payer_id': payer_id}):
 		print('Payment was successful')
 		print(payment.__dict__)
-		
+
 		# msg = bot.send_message(user['_id'], 'Payment was successful\n Order has been started!')
 		# menu(msg)
 	else:
-		bot.send_message()
 		print(payment.error)
 	return "Payment success!", 200
 
