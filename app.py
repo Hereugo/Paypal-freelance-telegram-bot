@@ -33,6 +33,31 @@ paypalrestsdk.configure({
 
 # Flask
 app = Flask(__name__)
+@app.route('/' + TOKEN, methods=['POST'])
+def getMessage():
+	bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+	print('Good')
+	return "!", 200
+
+@app.route('/payment/execute')
+def execute():
+	payment_id = request.args['paymentId']
+	payer_id = request.args['PayerID']
+
+	payment = paypalrestsdk.Payment.find(payment_id)
+	if payment.execute({'payer_id': payer_id}):
+		print('Payment was successful')
+	else:
+		print(payment.error)
+
+@app.route('/')
+def webhook():
+	bot.remove_webhook()
+	bot.set_webhook(url='https://paypal-telegram-fiverr-bot.herokuapp.com/' + TOKEN)
+	return '!', 200
+
+
+
 
 def newId():
 	return str(randint(1, 1e9))
@@ -42,6 +67,7 @@ def previous(path):
 
 @bot.message_handler(commands=['start'])
 def menu(message):
+	print("MENU")
 	userId = message.chat.id
 	result = collection.find_one({'_id': userId})
 	if result == None:
@@ -406,30 +432,6 @@ def callback_query(call):
 		method(call.message)
 	else:
 		method(call.message, value)
-
-
-@app.route('/' + TOKEN, methods=['POST'])
-def getMessage():
-	bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
-	return "!", 200
-
-@app.route('/payment/execute')
-def execute():
-	payment_id = request.args['paymentId']
-	payer_id = request.args['PayerID']
-
-	payment = paypalrestsdk.Payment.find(payment_id)
-	if payment.execute({'payer_id': payer_id}):
-		print('Payment was successful')
-	else:
-		print(payment.error)
-
-@app.route('/')
-def webhook():
-	bot.remove_webhook()
-	bot.set_webhook(url='https://paypal-telegram-fiverr-bot.herokuapp.com/' + TOKEN)
-	return '!', 200
-
 
 if __name__ == "__main__":
 	app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
