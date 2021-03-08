@@ -46,17 +46,17 @@ def execute():
 	payment_id = request.args['paymentId']
 	payer_id = request.args['PayerID']
 
-	# user = collection.find_one({'paypal_account': payer_id})
-
 	payment = paypalrestsdk.Payment.find(payment_id)
+	[desc, uid1, uid2] = payment['description'].split('#')
+	print(desc, uid1, uid2)
 	if payment.execute({'payer_id': payer_id}):
 		print('Payment was successful')
-		print(payment.__dict__)
-
-		# msg = bot.send_message(user['_id'], 'Payment was successful\n Order has been started!')
-		# menu(msg)
+		msg = bot.send_message(int(uid2), 'Payment was successful\n Order has been started!')
 	else:
 		print(payment.error)
+		msg = bot.send_message(int(uid2), 'Payment was successful\n Order has been started!')
+	menu(msg)
+
 	return "Payment success!", 200
 
 @app.route('/')
@@ -199,7 +199,7 @@ def buy_order(message, value):
 					'total': '{}.00'.format(gig['price']),
 					'currency': 'USD'
 				},
-				'description': gig['desc'],
+				'description': gig['desc'] + '\n#{}#{}'.format(user['_id'], userId),
 			}
 		]
 	})
