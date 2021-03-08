@@ -51,6 +51,7 @@ def execute():
 		print('Payment was successful')
 	else:
 		print(payment.error)
+	return "Payment success!", 200
 
 @app.route('/')
 def webhook():
