@@ -161,11 +161,11 @@ def process_search_order_step(message, token=""):
 
 def buy_order(message, value):
 	userId = message.chat.id
-	user = collection.find_one({'gigs.token': value})
+	user = collection.find_one({'gigs.token': value[0]})
 	gig = ""
 	print(user)
 	for x in user['gigs']:
-		if x['token'] == value:
+		if x['token'] == value[0]:
 			gig = x
 			break
 	print(gig)
