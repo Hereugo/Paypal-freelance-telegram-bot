@@ -96,6 +96,9 @@ def menu(message):
 	keyboard = InlineKeyboardMarkup()
 	for button in messages['menu']['buttons']:
 		keyboard.add(InlineKeyboardButton(button.text, callback_data=button.callback_data))
+
+	print(result)
+	bot.send_message(userId, "Why", reply_markup=keyboard)
 	bot.send_message(userId, messages.menu.text, reply_markup=keyboard)
 
 @bot.message_handler(commands=['back'])
