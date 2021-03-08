@@ -19,18 +19,6 @@ from flask import Flask, jsonify, request
 # Telebot
 bot = telebot.TeleBot(TOKEN)
 
-#Mongo DB
-cluster = MongoClient('mongodb+srv://Amir:2LSCfSNcwAz9x3!@cluster0.jxsw1.mongodb.net/myFirstDatabase?retryWrites=true&w=majority')
-db = cluster['telegram']
-collection = db['user']
-
-# Paypal python sdk
-paypalrestsdk.configure({
-	"mode": "sandbox", # sandbox or live
-	"client_id": "AW7Q6ChzzOnd5wa8OuYbiP5RiaqQ6tumVR7UTlMLaDIF_FXRhxo77BaNmjgQfKN6GBLK5c2rDHiijpHv",
-	"client_secret": "EBBmQczfJM6WrweaUE-NDMOxpBn__GH_RXtXQB1nwt8AN6doaa7MBEYuf3ok6EREj8AsrL7Eg7vSE4wM",
-})
-
 # Flask
 app = Flask(__name__)
 @app.route('/' + TOKEN, methods=['POST'])
@@ -52,6 +40,19 @@ def execute():
 
 @app.route('/')
 def webhook():
+	#Mongo DB
+	cluster = MongoClient('mongodb+srv://Amir:2LSCfSNcwAz9x3!@cluster0.jxsw1.mongodb.net/myFirstDatabase?retryWrites=true&w=majority')
+	db = cluster['telegram']
+	collection = db['user']
+
+	# Paypal python sdk
+	paypalrestsdk.configure({
+		"mode": "sandbox", # sandbox or live
+		"client_id": "AW7Q6ChzzOnd5wa8OuYbiP5RiaqQ6tumVR7UTlMLaDIF_FXRhxo77BaNmjgQfKN6GBLK5c2rDHiijpHv",
+		"client_secret": "EBBmQczfJM6WrweaUE-NDMOxpBn__GH_RXtXQB1nwt8AN6doaa7MBEYuf3ok6EREj8AsrL7Eg7vSE4wM",
+	})
+
+	# Telebot
 	bot.remove_webhook()
 	bot.set_webhook(url='https://paypal-telegram-fiverr-bot.herokuapp.com/' + TOKEN)
 	return '!', 200
