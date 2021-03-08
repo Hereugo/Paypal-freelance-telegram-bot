@@ -47,7 +47,7 @@ def execute():
 	payer_id = request.args['PayerID']
 
 	payment = paypalrestsdk.Payment.find(payment_id)
-	[desc, uid1, uid2] = payment['description'].split('#')
+	[desc, uid1, uid2] = payment['transactions'][0]['description'].split('#')
 	print(desc, uid1, uid2)
 	if payment.execute({'payer_id': payer_id}):
 		print('Payment was successful')
