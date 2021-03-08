@@ -334,7 +334,6 @@ def create_new_gig_complete(message):
 def register(message, value):
 	userId = message.chat.id
 	user = collection.find_one({'_id': userId})
-	msg = user['last_message']
 	path = user['path']
 
 	if value[0] != '9':
@@ -347,11 +346,14 @@ def register(message, value):
 	collection.update_one({'_id': userId}, {'$set': {'path': previous(path)}})
 
 	if value[0] == '0': # Name
-		collection.update_one({'_id': userId}, {'$set': {'name': msg['text']}})
+		msgg = bot.send_message(userId, 'Typin your name')
+		bot.register_next_step_handler(msgg, process_register_step)
 	elif value[0] == '1': # Paypal account
-		collection.update_one({'_id': userId}, {'$set': {'paypal_account': msg['text']}})
+		msgg = bot.send_message(userId, 'Typin your paypal account')
+		bot.register_next_step_handler(msgg, process_register_step)
 	elif value[0] == '2': # Profile Description
-		collection.update_one({'_id': userId}, {'$set': {'profile_desc': msg['text']}})
+		msgg = bot.send_message(userId, 'Typin your profile description')
+		bot.register_next_step_handler(msgg, process_register_step)
 
 	keyboard = InlineKeyboardMarkup()
 	for button in messages.register.buttons:
@@ -359,6 +361,22 @@ def register(message, value):
 
 	user = collection.find_one({'_id': userId})
 	bot.send_message(userId, messages.register.text.format(user['name'], user['paypal_account'], user['profile_desc']), reply_markup=keyboard)
+
+def process_register_step(message):
+	text = message.text
+	userId = message.chat.id
+
+	user = collection.find_one({'_id': userId})
+	[query, value] = calc(re.search(r'\w+(|\?[^\/]+)$', user['path'])[0])
+	msg = user['last_message']
+	
+	if value[0] == '0': # Name
+		collection.update_one({'_id': userId}, {'$set': {'name': msg['text']}})
+	elif value[0] == '1': # Paypal account
+		collection.update_one({'_id': userId}, {'$set': {'paypal_account': msg['text']}})
+	elif value[0] == '2': # Profile Description
+		collection.update_one({'_id': userId}, {'$set': {'profile_desc': msg['text']}})
+	register(message, ['9'])
 
 def register_complete(message):
 	userId = message.chat.id
