@@ -46,16 +46,22 @@ def execute():
 	payment_id = request.args['paymentId']
 	payer_id = request.args['PayerID']
 
+	# user = collection.find_one({'paypal_account': payer_id})
+
 	payment = paypalrestsdk.Payment.find(payment_id)
 	if payment.execute({'payer_id': payer_id}):
 		print('Payment was successful')
+		print(payment.__dict__)
+		
+		# msg = bot.send_message(user['_id'], 'Payment was successful\n Order has been started!')
+		# menu(msg)
 	else:
+		bot.send_message()
 		print(payment.error)
 	return "Payment success!", 200
 
 @app.route('/')
 def webhook():
-	# Telebot
 	bot.remove_webhook()
 	bot.set_webhook(url=URL + TOKEN)
 	return '!', 200
@@ -164,12 +170,10 @@ def buy_order(message, value):
 	userId = message.chat.id
 	user = collection.find_one({'gigs.token': value[0]})
 	gig = ""
-	print(user)
 	for x in user['gigs']:
 		if x['token'] == value[0]:
 			gig = x
 			break
-	print(gig)
 	payment = Payment({
 		'intent': 'sale',
 		'payer': {
