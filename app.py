@@ -23,6 +23,7 @@ bot = telebot.TeleBot(TOKEN)
 URI = 'mongodb+srv://Amir:2LSCfSNcwAz9x3!@cluster0.jxsw1.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
 app = Flask(__name__)
 cluster = PyMongo(app, uri=URI)
+print(cluster)
 collection = cluster['telegram']['user']
 
 
@@ -437,7 +438,6 @@ def callback_query(call):
 	else:
 		method(call.message, value)
 
-bot.remove_webhook()
-bot.polling()
-# if __name__ == "__main__":
-# 	app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
+
+if __name__ == "__main__":
+	app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
