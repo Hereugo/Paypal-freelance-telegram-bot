@@ -1,6 +1,6 @@
 from functions import Map
 
-token = "1272925344:AAFO3V-DSpEcMYkfL8oMZ38Ei7JlAFIXr-o"
+TOKEN = "1272925344:AAFO3V-DSpEcMYkfL8oMZ38Ei7JlAFIXr-o"
 
 # PATH SYSTEM
 
