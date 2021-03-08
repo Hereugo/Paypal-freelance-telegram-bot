@@ -21,6 +21,7 @@ bot = telebot.TeleBot(TOKEN)
 
 # Flask
 URI = 'mongodb+srv://Amir:2LSCfSNcwAz9x3!@cluster0.jxsw1.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
+URL = 'https://paypal-telegram-fiverr-bot.herokuapp.com/'
 app = Flask(__name__)
 cluster = PyMongo(app, uri=URI)
 collection = cluster.db.user
@@ -55,7 +56,7 @@ def execute():
 def webhook():
 	# Telebot
 	bot.remove_webhook()
-	bot.set_webhook(url='https://paypal-telegram-fiverr-bot.herokuapp.com/' + TOKEN)
+	bot.set_webhook(url=URL + TOKEN)
 	return '!', 200
 
 def newId():
@@ -158,12 +159,13 @@ def process_search_order_step(message, token=""):
 
 	bot.send_message(userId, messages.search_order.text.format(gig['title'], gig['desc'], gig['price'], user['name']), reply_markup=keyboard)
 
-def buy_order(message, token):
+def buy_order(message, value):
 	userId = message.chat.id
-	user = collection.find_one({'gigs.token': token})
+	user = collection.find_one({'gigs.token': value})
 	gig = ""
+	print(user)
 	for x in user['gigs']:
-		if x['token'] == token:
+		if x['token'] == value:
 			gig = x
 			break
 	print(gig)
@@ -173,8 +175,8 @@ def buy_order(message, token):
 			'payment_method': 'paypal',
 		},
 		'redirect_urls': {
-	        "return_url": "{}payment/execute/".format(url),
-	        "cancel_url": "{}".format(url),
+	        "return_url": URL + "payment/execute/",
+	        "cancel_url": URL,
 		},
 		'transactions': [
 			{
