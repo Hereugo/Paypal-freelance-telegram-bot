@@ -348,12 +348,15 @@ def register(message, value):
 	if value[0] == '0': # Name
 		msgg = bot.send_message(userId, 'Typin your name')
 		bot.register_next_step_handler(msgg, process_register_step)
+		return
 	elif value[0] == '1': # Paypal account
 		msgg = bot.send_message(userId, 'Typin your paypal account')
 		bot.register_next_step_handler(msgg, process_register_step)
+		return
 	elif value[0] == '2': # Profile Description
 		msgg = bot.send_message(userId, 'Typin your profile description')
 		bot.register_next_step_handler(msgg, process_register_step)
+		return
 
 	keyboard = InlineKeyboardMarkup()
 	for button in messages.register.buttons:
@@ -369,7 +372,7 @@ def process_register_step(message):
 	user = collection.find_one({'_id': userId})
 	[query, value] = calc(re.search(r'\w+(|\?[^\/]+)$', user['path'])[0])
 	msg = user['last_message']
-	
+
 	if value[0] == '0': # Name
 		collection.update_one({'_id': userId}, {'$set': {'name': msg['text']}})
 	elif value[0] == '1': # Paypal account
