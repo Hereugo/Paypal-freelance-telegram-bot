@@ -70,6 +70,8 @@ def previous(path):
 def menu(message):
 	print("MENU")
 	userId = message.chat.id
+	
+	bot.send_message(userId, "WHYHY")
 	result = collection.find_one({'_id': userId})
 	if result == None:
 		user = {
