@@ -331,9 +331,7 @@ def register(message, value):
 	userId = message.chat.id
 	user = collection.find_one({'_id': userId})
 	path = user['path']
-
-	collection.update_one({'_id': userId}, {'$set': {'path': previous(path)}})
-
+	
 	if value[0] == '0': # Name
 		msgg = bot.send_message(userId, 'Typin your name')
 		bot.register_next_step_handler(msgg, process_register_step)
@@ -347,6 +345,7 @@ def register(message, value):
 		bot.register_next_step_handler(msgg, process_register_step)
 		return
 
+	collection.update_one({'_id': userId}, {'$set': {'path': previous(path)}})
 	keyboard = InlineKeyboardMarkup()
 	for button in messages.register.buttons:
 		keyboard.add(InlineKeyboardButton(button.text, callback_data=button.callback_data))
@@ -361,14 +360,13 @@ def process_register_step(message):
 	user = collection.find_one({'_id': userId})
 	[query, value] = calc(re.search(r'\w+(|\?[^\/]+)$', user['path'])[0])
 
-	print(query, value, user['path'], text)
 	if value[0] == '0': # Name
 		collection.update_one({'_id': userId}, {'$set': {'name': text}})
 	elif value[0] == '1': # Paypal account
 		collection.update_one({'_id': userId}, {'$set': {'paypal_account': text}})
 	elif value[0] == '2': # Profile Description
 		collection.update_one({'_id': userId}, {'$set': {'profile_desc': text}})
-	collection.update_one({'_id': userId}, {'$set': {'path': path + '/register?9'}})
+
 	register(message, ['9'])
 
 def register_complete(message):
