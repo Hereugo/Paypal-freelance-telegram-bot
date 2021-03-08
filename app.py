@@ -331,7 +331,7 @@ def register(message, value):
 	userId = message.chat.id
 	user = collection.find_one({'_id': userId})
 	path = user['path']
-	
+
 	if value[0] == '0': # Name
 		msgg = bot.send_message(userId, 'Typin your name')
 		bot.register_next_step_handler(msgg, process_register_step)
@@ -359,7 +359,7 @@ def process_register_step(message):
 
 	user = collection.find_one({'_id': userId})
 	[query, value] = calc(re.search(r'\w+(|\?[^\/]+)$', user['path'])[0])
-
+	print(query, value, user['path'])
 	if value[0] == '0': # Name
 		collection.update_one({'_id': userId}, {'$set': {'name': text}})
 	elif value[0] == '1': # Paypal account
