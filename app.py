@@ -286,15 +286,15 @@ def create_new_gig(message, value):
 
 	if value[0] == '0': # Title
 		msgg = bot.send_message(userId, 'Typin your Title')
-		bot.register_next_step_handler(msgg, process_register_step)
+		bot.register_next_step_handler(msgg, process_create_new_gig_step)
 		return
 	elif value[0] == '1': # Description
 		msgg = bot.send_message(userId, 'Typin your gigs description')
-		bot.register_next_step_handler(msgg, process_register_step)
+		bot.register_next_step_handler(msgg, process_create_new_gig_step)
 		return
 	elif value[0] == '2': # Price
 		msgg = bot.send_message(userId, 'Set your price')
-		bot.register_next_step_handler(msgg, process_register_step)
+		bot.register_next_step_handler(msgg, process_create_new_gig_step)
 		return
 
 	collection.update_one({'_id': userId}, {'$set': {'path': previous(path)}})
