@@ -379,6 +379,7 @@ def process_register_step(message):
 		collection.update_one({'_id': userId}, {'$set': {'paypal_account': msg['text']}})
 	elif value[0] == '2': # Profile Description
 		collection.update_one({'_id': userId}, {'$set': {'profile_desc': msg['text']}})
+	collection.update_one({'_id': userId}, {'$set': {'path': previous(path) + '/register?9'}})
 	register(message, ['9'])
 
 def register_complete(message):
