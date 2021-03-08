@@ -282,24 +282,22 @@ def edit_gig(message, value):
 def create_new_gig(message, value):
 	userId = message.chat.id
 	user = collection.find_one({'_id': userId})
-	msg = user['last_message']
 	path = user['path']
 
-	if value[0] != '9':
-		try:
-			bot.delete_message(userId, msg['id'])
-		except:
-			pass
-
+	if value[0] == '0': # Title
+		msgg = bot.send_message(userId, 'Typin your Title')
+		bot.register_next_step_handler(msgg, process_register_step)
+		return
+	elif value[0] == '1': # Description
+		msgg = bot.send_message(userId, 'Typin your gigs description')
+		bot.register_next_step_handler(msgg, process_register_step)
+		return
+	elif value[0] == '2': # Price
+		msgg = bot.send_message(userId, 'Set your price')
+		bot.register_next_step_handler(msgg, process_register_step)
+		return
 
 	collection.update_one({'_id': userId}, {'$set': {'path': previous(path)}})
-
-	if value[0] == '0': # Title
-		collection.update_one({'_id': userId}, {'$set': {'process_gig.title': msg['text']}})
-	elif value[0] == '1': # Description
-		collection.update_one({'_id': userId}, {'$set': {'process_gig.desc': msg['text']}})
-	elif value[0] == '2': # Price
-		collection.update_one({'_id': userId}, {'$set': {'process_gig.price': msg['text']}})
 
 	keyboard = InlineKeyboardMarkup()
 	for button in messages.create_new_gig.buttons:
@@ -307,6 +305,22 @@ def create_new_gig(message, value):
 
 	gig = collection.find_one({'_id': userId})['process_gig']
 	bot.send_message(userId, messages.create_new_gig.text.format(gig['title'], gig['desc'], gig['price']), reply_markup=keyboard)
+
+def process_create_new_gig_step(message):
+	text = message.text
+	userId = message.chat.id
+
+	user = collection.find_one({'_id': userId})
+	[query, value] = calc(re.search(r'\w+(|\?[^\/]+)$', user['path'])[0])
+	print(query, value, user['path'])
+	if value[0] == '0': # Title
+		collection.update_one({'_id': userId}, {'$set': {'process_gig.title': text}})
+	elif value[0] == '1': # Description
+		collection.update_one({'_id': userId}, {'$set': {'process_gig.desc': text}})
+	elif value[0] == '2': # Price
+		collection.update_one({'_id': userId}, {'$set': {'process_gig.price': text}})
+
+	create_new_gig(message, ['9'])
 
 def create_new_gig_complete(message):
 	userId = message.chat.id
