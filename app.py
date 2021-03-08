@@ -83,10 +83,6 @@ def menu(message):
 			'paypal_account': '',
 			'profile_desc': '',
 			'path': 'menu',
-			'last_message': {
-				'text': "",
-				"id": "",
-			},
 			'process_gig': {
 				'title':"", 
 				'desc':"", 
@@ -336,13 +332,6 @@ def register(message, value):
 	user = collection.find_one({'_id': userId})
 	path = user['path']
 
-	if value[0] != '9':
-		try:
-			bot.delete_message(userId, msg['id'])
-		except:
-			pass
-
-
 	collection.update_one({'_id': userId}, {'$set': {'path': previous(path)}})
 
 	if value[0] == '0': # Name
@@ -372,6 +361,7 @@ def process_register_step(message):
 	user = collection.find_one({'_id': userId})
 	[query, value] = calc(re.search(r'\w+(|\?[^\/]+)$', user['path'])[0])
 
+	print(query, value, user['path'], text)
 	if value[0] == '0': # Name
 		collection.update_one({'_id': userId}, {'$set': {'name': text}})
 	elif value[0] == '1': # Paypal account
@@ -429,12 +419,6 @@ def back(message):
 		method(message)
 	else:
 		method(message, value)
-
-
-@bot.message_handler(func=lambda message: True)
-def message_processer(message):
-	userId = message.chat.id
-	collection.update_one({'_id': userId}, {'$set': {'last_message': {'text': message.text, 'id': message.message_id}}})
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
