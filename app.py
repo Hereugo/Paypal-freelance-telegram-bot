@@ -41,7 +41,7 @@ def getMessage():
 	print('Good')
 	return "!", 200
 
-@app.route('/payment/execute')
+@app.route('/payment/execute/')
 def execute():
 	payment_id = request.args['paymentId']
 	payer_id = request.args['PayerID']
