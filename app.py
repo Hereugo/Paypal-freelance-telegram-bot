@@ -371,14 +371,13 @@ def process_register_step(message):
 
 	user = collection.find_one({'_id': userId})
 	[query, value] = calc(re.search(r'\w+(|\?[^\/]+)$', user['path'])[0])
-	msg = user['last_message']
 
 	if value[0] == '0': # Name
-		collection.update_one({'_id': userId}, {'$set': {'name': msg['text']}})
+		collection.update_one({'_id': userId}, {'$set': {'name': text}})
 	elif value[0] == '1': # Paypal account
-		collection.update_one({'_id': userId}, {'$set': {'paypal_account': msg['text']}})
+		collection.update_one({'_id': userId}, {'$set': {'paypal_account': text}})
 	elif value[0] == '2': # Profile Description
-		collection.update_one({'_id': userId}, {'$set': {'profile_desc': msg['text']}})
+		collection.update_one({'_id': userId}, {'$set': {'profile_desc': text}})
 	collection.update_one({'_id': userId}, {'$set': {'path': path + '/register?9'}})
 	register(message, ['9'])
 
