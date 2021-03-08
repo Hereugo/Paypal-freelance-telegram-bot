@@ -23,7 +23,6 @@ bot = telebot.TeleBot(TOKEN)
 URI = 'mongodb+srv://Amir:2LSCfSNcwAz9x3!@cluster0.jxsw1.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
 app = Flask(__name__)
 cluster = PyMongo(app, uri=URI)
-print(cluster.__dict__)
 collection = cluster.db.user
 
 
@@ -67,10 +66,7 @@ def previous(path):
 
 @bot.message_handler(commands=['start'])
 def menu(message):
-	print("MENU")
 	userId = message.chat.id
-
-	bot.send_message(userId, "WHYHY")
 	result = collection.find_one({'_id': userId})
 	if result == None:
 		user = {
@@ -99,8 +95,6 @@ def menu(message):
 	for button in messages['menu']['buttons']:
 		keyboard.add(InlineKeyboardButton(button.text, callback_data=button.callback_data))
 
-	print(result)
-	bot.send_message(userId, "Why", reply_markup=keyboard)
 	bot.send_message(userId, messages.menu.text, reply_markup=keyboard)
 
 @bot.message_handler(commands=['back'])
@@ -172,6 +166,7 @@ def buy_order(message, token):
 		if x['token'] == token:
 			gig = x
 			break
+	print(gig)
 	payment = Payment({
 		'intent': 'sale',
 		'payer': {
