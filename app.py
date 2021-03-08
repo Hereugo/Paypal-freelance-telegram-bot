@@ -23,8 +23,8 @@ bot = telebot.TeleBot(TOKEN)
 URI = 'mongodb+srv://Amir:2LSCfSNcwAz9x3!@cluster0.jxsw1.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
 app = Flask(__name__)
 cluster = PyMongo(app, uri=URI)
-print(cluster)
-collection = cluster['telegram']['user']
+print(cluster.__dict__)
+collection = cluster.db.user
 
 
 # Paypal python sdk
