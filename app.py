@@ -4,7 +4,7 @@ from random import *
 
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-from config import token, messages
+from config import TOKEN, messages
 from functions import Map
 
 import pymongo
@@ -17,7 +17,7 @@ from flask import Flask, jsonify, request
 
 
 # Telebot
-bot = telebot.TeleBot(token, threaded=False)
+bot = telebot.TeleBot(TOKEN)
 
 #Mongo DB
 cluster = MongoClient('mongodb+srv://Amir:2LSCfSNcwAz9x3!@cluster0.jxsw1.mongodb.net/myFirstDatabase?retryWrites=true&w=majority')
@@ -33,31 +33,6 @@ paypalrestsdk.configure({
 
 # Flask
 app = Flask(__name__)
-app.config.from_object(__name__)
-
-@app.route('/bot', methods=['POST'])
-def botting():
-	update = telebot.types.Update.de_json(request.stream.read().decode('utf-8'))
-	bot.process_new_updates([update])
-	return '!', 200
-
-@app.route('/payment/execute')
-def execute():
-	payment_id = request.args['paymentId']
-	payer_id = request.args['PayerID']
-
-	payment = paypalrestsdk.Payment.find(payment_id)
-	if payment.execute({'payer_id': payer_id}):
-		print('Payment was successful')
-	else:
-		print(payment.error)
-
-@app.route('/')
-def webhook():
-	bot.remove_webhook()
-	bot.set_webhook(url='https://paypal-telegram-fiverr-bot.herokuapp.com/bot')
-	return '?', 200
-
 
 def newId():
 	return str(randint(1, 1e9))
@@ -432,4 +407,29 @@ def callback_query(call):
 	else:
 		method(call.message, value)
 
-app.run(host="0.0.0.0", port=os.environ.get('PORT', 80))
+
+@app.route('/' + TOKEN, methods=['POST'])
+def getMessage():
+	bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+	return "!", 200
+
+@app.route('/payment/execute')
+def execute():
+	payment_id = request.args['paymentId']
+	payer_id = request.args['PayerID']
+
+	payment = paypalrestsdk.Payment.find(payment_id)
+	if payment.execute({'payer_id': payer_id}):
+		print('Payment was successful')
+	else:
+		print(payment.error)
+
+@app.route('/')
+def webhook():
+	bot.remove_webhook()
+	bot.set_webhook(url='https://paypal-telegram-fiverr-bot.herokuapp.com/' + TOKEN)
+	return '!', 200
+
+
+if __name__ == "__main__":
+	server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
