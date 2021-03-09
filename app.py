@@ -172,12 +172,13 @@ def process_search_order_step(message, token=""):
 
 def create_offer(message, value):
 	userId = message.chat.id
-	user = collection.find_one({'gigs.token': value[0]})
+	seller = collection.find_one({'gigs.token': value[0]})
 	gig = ""
-	for x in user['gigs']:
+	for x in seller['gigs']:
 		if x['token'] == value[0]:
 			gig = x
 			break
+	print(gig)
 
 	if value[1] == '0':
 		msgg = bot.send_message(userId, 'Set your time in days')
@@ -185,14 +186,17 @@ def create_offer(message, value):
 		return
 
 	collection.update_one({'_id': userId}, {'$set': {'path': previous(path), 'process_order.token': value[0]}})
+	buyer = collection.find_one({'_id': userId})
 
+
+	print(seller, buyer)
 	keyboard = InlineKeyboardMarkup()
 
 	keyboard.add(InlineKeyboardButton(messages.create_offer.buttons[0].text, callback_data=messages.create_offer.buttons[0].callback_data.format(value[0], 0)))
-	keyboard.add(InlineKeyboardButton(messages.create_offer.buttons[1].text, callback_data=messages.create_offer.buttons[1].callback_data.format(value[0])))
 	keyboard.add(InlineKeyboardButton(messages.create_offer.buttons[1].text, callback_data=messages.create_offer.buttons[1].callback_data))
+	keyboard.add(InlineKeyboardButton(messages.create_offer.buttons[2].text, callback_data=messages.create_offer.buttons[2].callback_data))
 
-	bot.send_message(userId, messages.create_offer.text.format(gig['title'], gig['desc'], gig['price'], user['name'], user['process_order']['duration']), reply_markup=keyboard)
+	bot.send_message(userId, messages.create_offer.text.format(gig['title'], gig['desc'], gig['price'], seller['name'], buyer['process_order']['duration']), reply_markup=keyboard)
 def process_create_offer_time_step(message):
 	text = message.text
 	userId = message.chat.id
