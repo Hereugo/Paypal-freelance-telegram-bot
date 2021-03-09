@@ -27,6 +27,7 @@ app = Flask(__name__)
 cluster = PyMongo(app, uri=URI)
 collection = cluster.db.user
 
+empty_key = ['', ['']]
 
 # Paypal python sdk
 paypalrestsdk.configure({
@@ -98,6 +99,16 @@ def newId():
 def previous(path):
 	return re.search(r'(.+\/)+', path)[0][:-1]
 
+def create_keyboard(arr, vals):
+	keyboard = InlineKeyboardMarkup()
+	i = 0
+	for lst in arr:
+		buttons = []
+		for button in lst:
+			buttons.append(InlineKeyboardButton(button.text.format(vals[i][0]), callback_data=button.callback_data.format(*vals[i][1])))
+			i = i + 1
+		keyboard.row(*buttons)
+
 @bot.message_handler(commands=['menu'])
 def menu(message):
 	userId = message.chat.id
@@ -126,14 +137,8 @@ def menu(message):
 		collection.insert_one(user)
 
 	collection.update_one({'_id': userId}, {'$set': {'path': 'menu'}})
-	print('hello??', messages.menu)
-	keyboard = InlineKeyboardMarkup()
-	for lst in messages.menu.buttons:
-		buttons = []
-		for button in lst:
-			buttons.append(InlineKeyboardButton(button.text, callback_data=button.callback_data))
-		keyboard.row(*buttons)
 
+	keyboard = create_keyboard(messages.menu.buttons, [empty_key, empty_key])
 	bot.send_message(userId, messages.menu.text, reply_markup=keyboard)
 
 @bot.message_handler(commands=['back'])
@@ -156,9 +161,8 @@ def profile_buyer(message):
 	if checkRegistration(message, user):
 		return
 
-	keyboard = InlineKeyboardMarkup()
-	for button in messages.profile_buyer.buttons:
-		keyboard.add(InlineKeyboardButton(button.text, callback_data=button.callback_data))
+	keyboard = create_keyboard(messages.profile_buyer.buttons, [empty_key, empty_key, empty_key])
+	
 	bot.send_message(userId, messages.profile_buyer.text.format(user['name'], user['paypal_account']), reply_markup=keyboard)
 
 def search_order(message, value=-1):
