@@ -17,7 +17,7 @@ messages = Map({
 					'text': 'As buyer',
 					'callback_data': 'profile_buyer',
 				}
-			],
+			]
 		]
 	},
 	'profile_buyer': {

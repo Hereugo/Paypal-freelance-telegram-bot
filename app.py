@@ -129,14 +129,12 @@ def menu(message):
 
 
 	keyboard = InlineKeyboardMarkup()
-	buttons = []
 	for lst in messages.menu.buttons:
-		x = []
+		buttons = []
 		for button in lst:
-			x.append(InlineKeyboardButton(button.text, callback_data=button.callback_data))
-		buttons.append(x)
-	keyboard.add(buttons)
-	
+			buttons.append(InlineKeyboardButton(button.text, callback_data=button.callback_data))
+		keyboard.add([buttons])
+
 	bot.send_message(userId, messages.menu.text, reply_markup=keyboard)
 
 @bot.message_handler(commands=['back'])
