@@ -27,7 +27,7 @@ app = Flask(__name__)
 cluster = PyMongo(app, uri=URI)
 collection = cluster.db.user
 
-empty_key = ['', ['']]
+empty_key = [[''], ['']]
 
 # Paypal python sdk
 paypalrestsdk.configure({
@@ -105,9 +105,10 @@ def create_keyboard(arr, vals):
 	for lst in arr:
 		buttons = []
 		for button in lst:
-			buttons.append(InlineKeyboardButton(button.text.format(vals[i][0]), callback_data=button.callback_data.format(*vals[i][1])))
+			buttons.append(InlineKeyboardButton(button.text.format(*vals[i][0]), callback_data=button.callback_data.format(*vals[i][1])))
 			i = i + 1
 		keyboard.row(*buttons)
+	return keyboard
 
 @bot.message_handler(commands=['menu'])
 def menu(message):
@@ -162,7 +163,7 @@ def profile_buyer(message):
 		return
 
 	keyboard = create_keyboard(messages.profile_buyer.buttons, [empty_key, empty_key, empty_key])
-	
+
 	bot.send_message(userId, messages.profile_buyer.text.format(user['name'], user['paypal_account']), reply_markup=keyboard)
 
 def search_order(message, value=-1):
