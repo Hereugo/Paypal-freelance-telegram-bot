@@ -407,7 +407,7 @@ def decline_offer(message, value):
 			offer = x
 			break
 
-	collection.update_one({'_id': uid1}, {'$pull': {'offers': {'id': offer['id']}}})
+	collection.update_one({'_id': userId}, {'$pull': {'offers': {'id': offer['id']}}})
 	bot.send_message(offer['customer'], '{} has declined your offer'.format(seller['username']))
 
 def token_reciever(message, value):
