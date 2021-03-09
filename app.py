@@ -217,8 +217,9 @@ def create_offer_complete(message):
 
 	buyer = collection.find_one({'_id': userId})
 	offer = buyer['process_order']
-	seller = collection.find_one({'gig.token': offer['token']})
-
+	seller = collection.find_one({'gigs.token': offer['token']})
+	print(offer)
+	print(seller, buyer)
 	collection.update_one({'_id': seller['_id']}, {'$push': {'offers': offer}}) # Send offer to seller
 	collection.update_one({'_id': userId}, {'$set': {'process_order': {'id': str(newId()), 'duration': "", 'token': '#'}}}) # Clear process order of buyer
 
@@ -346,8 +347,6 @@ def offers(message, value):
 
 def accept_offer(message, value):
 	userId = message.chat.id
-
-
 
 
 def token_reciever(message, value):
