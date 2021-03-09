@@ -133,6 +133,8 @@ def menu(message):
 		for button in lst:
 			x.append(InlineKeyboardButton(button.text, callback_data=button.callback_data))
 		buttons.add([x])
+		print(x)
+	print(buttons)
 	keyboard = InlineKeyboardMarkup([buttons], resize_keyboard=True)
 
 	bot.send_message(userId, messages.menu.text, reply_markup=keyboard)
