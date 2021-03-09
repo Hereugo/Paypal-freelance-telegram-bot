@@ -126,13 +126,15 @@ def menu(message):
 		collection.insert_one(user)
 
 	collection.update_one({'_id': userId}, {'$set': {'path': 'menu'}})
-	print('hello??')
+	print('hello??', messages.menu)
+	print(buttons)
 	buttons = []
 	for lst in messages.menu.buttons:
+		print(lst)
 		x = []
 		for button in lst:
 			x.append(InlineKeyboardButton(button.text, callback_data=button.callback_data))
-		buttons.add([x])
+		buttons.append([x])
 		print(x)
 	print(buttons)
 	keyboard = InlineKeyboardMarkup([buttons], resize_keyboard=True)
