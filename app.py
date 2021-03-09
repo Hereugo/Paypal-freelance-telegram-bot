@@ -127,17 +127,12 @@ def menu(message):
 
 	collection.update_one({'_id': userId}, {'$set': {'path': 'menu'}})
 	print('hello??', messages.menu)
-	print(buttons)
-	buttons = []
+	keyboard = InlineKeyboardMarkup()
 	for lst in messages.menu.buttons:
-		print(lst)
-		x = []
+		buttons = []
 		for button in lst:
-			x.append(InlineKeyboardButton(button.text, callback_data=button.callback_data))
-		buttons.append([x])
-		print(x)
-	print(buttons)
-	keyboard = InlineKeyboardMarkup([buttons], resize_keyboard=True)
+			buttons.append(InlineKeyboardButton(button.text, callback_data=button.callback_data))
+		keyboard.row(*buttons)
 
 	bot.send_message(userId, messages.menu.text, reply_markup=keyboard)
 
