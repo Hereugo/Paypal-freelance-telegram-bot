@@ -210,10 +210,10 @@ def process_create_offer_time_step(message):
 
 	create_offer(message, [value[0], '9'])
 
-def create_offer_compelete(message):
+def create_offer_complete(message):
 	userId = message.chat.id
 
-	bot.send_message(userId, messages.create_offer_compelete.text[0])
+	bot.send_message(userId, messages.create_offer_complete.text[0])
 
 	buyer = collection.find_one({'_id': userId})
 	offer = buyer['process_order']
@@ -222,7 +222,7 @@ def create_offer_compelete(message):
 	collection.update_one({'_id': seller['_id']}, {'$push': {'offers': offer}}) # Send offer to seller
 	collection.update_one({'_id': userId}, {'$set': {'process_order': {'id': str(newId()), 'duration': "", 'token': '#'}}}) # Clear process order of buyer
 
-	bot.send_message(seller['_id'], messages.create_offer_compelete.text[1].format(buyer['username']))
+	bot.send_message(seller['_id'], messages.create_offer_complete.text[1].format(buyer['username']))
 
 # ####################
 # 	payment = Payment({
