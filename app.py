@@ -317,15 +317,18 @@ def accept_offer(message, value):
 
 	seller = collection.find_one({'_id': userId})
 	offer = ""
-	for x in seller.offers:
+	for x in seller['offers']:
 		if x['id'] == value[0]:
 			offer = x
 			break
+	print(offer)
 	gig = ""
-	for x in seller.gigs:
+	for x in seller['gigs']:
 		if x['token'] == offer['token']:
 			gig = x
 			break
+	print(gig)
+
 
 	payment = Payment({
 		'intent': 'sale',
