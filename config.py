@@ -53,18 +53,25 @@ messages = Map({
 		],
 	},
 	'create_offer': {
-		'text': '{}\n\n{}\n\nPrice: {}\n\nUser: {}\nTime: {} days'
+		'text': '{}\n\n{}\n\nPrice: {}\n\nUser: {}\nTime: {} days',
 		'buttons': [
 			{
 				'text': 'Set time',
 				'callback_data': 'create_offer?{},{}',
 			},
 			{
+				'text': 'Send',
+				'callback_data': 'create_offer_complete'
+			},
+			{
 				'text': 'Back',
 				'callback_data': 'back',
 			}
 		],
-	}
+	},
+	'create_offer_complete': {
+		'text': ['Offer has been sent, wait for a seller to confirm', 'New offer from {}'],
+	},
 	'see_profile': {
 		'text': 'Name: {}\n\n{}',
 		'buttons': [
@@ -95,8 +102,12 @@ messages = Map({
 		'text': "Name: {}\nPaypal: {}\n\n{}",
 		'buttons': [
 			{
-				'text': 'Orders',
+				'text': 'Active orders',
 				'callback_data': 'orders',
+			},
+			{
+				'text': 'Offers',
+				'callback_data': 'offers?0',
 			},
 			{
 				'text': 'Gigs',
@@ -116,11 +127,33 @@ messages = Map({
 			},
 		],
 	},
-	'orders': {
-		'text': 'Customer: {}\n Time: {}'
+	'offers': {
+		'text': 'Title: {}\n {}\n\n Price: {}\n Duration: {} days',
+		'buttons': [
+			{
+				'text': '<',
+				'callback_data': 'offers?{}',
+			},
+			{
+				'text': '>',
+				'callback_data': 'offers?{}',
+			},
+			{
+				'text': 'Accept',
+				'callback_data': 'accept_offer{}',
+			},
+			{
+				'text': 'Decline',
+				'callback_data': 'decline_offer{}',
+			},
+			{
+				'text': 'Back',
+				'callback_data': 'back',
+			}
+		],
 	},
 	'gigs': {
-		'text': 'Title:{}\n\nDescription:{}\n\n Price:{}',
+		'text': 'Title: {}\n\nDescription: {}\n\n Price: {}',
 		'buttons': [
 			{
 				'text': '<',

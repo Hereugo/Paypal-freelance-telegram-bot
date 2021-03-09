@@ -91,10 +91,10 @@ def menu(message):
 				'desc':"", 
 				'price':"", 
 				'token':"#",
-			}
+			},
 			'process_order': {
 				'token': "#",
-				'timer': "",
+				'duration': "",
 			},
 		}
 		collection.insert_one(user)
@@ -183,13 +183,15 @@ def create_offer(message, value):
 		bot.register_next_step_handler(msgg, process_create_offer_time_step)
 		return
 
-	collection.update_one({'_id': userId}, {'$set': {'path': previous(path)}})
+	collection.update_one({'_id': userId}, {'$set': {'path': previous(path), 'process_order.token': value[0]}})
 
 	keyboard = InlineKeyboardMarkup()
 
 	keyboard.add(InlineKeyboardButton(messages.create_offer.buttons[0].text, callback_data=messages.create_offer.buttons[0].callback_data.format(value[0], 0)))
-	keyboard.add(InlineKeyboardButton(messages.create_offer.buttons[1].text, callback_data=messages.create_offer.buttons[1].callback_data))	
-	bot.send_message(userId, messages.create_offer.text.format(gig['title'], gig['desc'], gig['price'], user['name'], ), reply_markup=keyboard)
+	keyboard.add(InlineKeyboardButton(messages.create_offer.buttons[1].text, callback_data=messages.create_offer.buttons[1].callback_data.format(value[0])))
+	keyboard.add(InlineKeyboardButton(messages.create_offer.buttons[1].text, callback_data=messages.create_offer.buttons[1].callback_data))
+
+	bot.send_message(userId, messages.create_offer.text.format(gig['title'], gig['desc'], gig['price'], user['name'], user['process_order']['duration']), reply_markup=keyboard)
 def process_create_offer_time_step(message):
 	text = message.text
 	userId = message.chat.id
@@ -198,51 +200,64 @@ def process_create_offer_time_step(message):
 	[query, value] = calc(re.search(r'\w+(|\?[^\/]+)$', user['path'])[0])
 	print(query, value, user['path'])
 	if value[1] == '0': # Timer
-		collection.update_one({'_id': userId}, {'$set': {'process_order.timer': text}})
+		collection.update_one({'_id': userId}, {'$set': {'process_order.duration': text}})
 
 	create_offer(message, [value[0], '9'])
 
+def create_offer_compelete(message):
+	userId = message.chat.id
 
-####################
-	payment = Payment({
-		'intent': 'sale',
-		'payer': {
-			'payment_method': 'paypal',
-		},
-		'redirect_urls': {
-	        "return_url": URL + "payment/execute/",
-	        "cancel_url": URL,
-		},
-		'transactions': [
-			{
-				'item_list': {
-					'items': [
-						{
-							'name': gig['title'],
-							'sku': "WHAT IS IT SKU",
-							'price': '{}.00'.format(gig['price']),
-							'currency': 'USD',
-							'quantity': 1
-						}
-					]
-				},
-				'amount': {
-					'total': '{}.00'.format(gig['price']),
-					'currency': 'USD'
-				},
-				'description': gig['desc'] + '\n#{}#{}'.format(user['_id'], userId),
-			}
-		]
-	})
-	if payment.create():
-		print("Payment created successfully")
-		for link in payment.links:
-			if link.rel == "approval_url":
-				approval_url = str(link.href)
-				print("Redirect for approval: %s" % (approval_url))
-				bot.send_message(userId, 'Go to this link to complete the order: %s' % (approval_url))
-	else:
-		bot.send_message(userId, 'Something went wrong')
+	bot.send_message(userId, messages.create_offer_compelete.text[0])
+
+	buyer = collection.find_one({'_id': userId})
+	offer = buyer['process_order']
+	seller = collection.find_one({'gig.token': offer['token']})
+
+	collection.update_one({'_id': seller['_id']}, {'$push': {'offers': offer}}) # Send offer to seller
+	collection.update_one({'_id': userId}, {'$set': {'process_order': {'id': str(newId()), 'duration': "", 'token': '#'}}}) # Clear process order of buyer
+
+	bot.send_message(seller['_id'], messages.create_offer_compelete.text[1].format(buyer['username']))
+
+# ####################
+# 	payment = Payment({
+# 		'intent': 'sale',
+# 		'payer': {
+# 			'payment_method': 'paypal',
+# 		},
+# 		'redirect_urls': {
+# 	        "return_url": URL + "payment/execute/",
+# 	        "cancel_url": URL,
+# 		},
+# 		'transactions': [
+# 			{
+# 				'item_list': {
+# 					'items': [
+# 						{
+# 							'name': gig['title'],
+# 							'sku': "WHAT IS IT SKU",
+# 							'price': '{}.00'.format(gig['price']),
+# 							'currency': 'USD',
+# 							'quantity': 1
+# 						}
+# 					]
+# 				},
+# 				'amount': {
+# 					'total': '{}.00'.format(gig['price']),
+# 					'currency': 'USD'
+# 				},
+# 				'description': gig['desc'] + '\n#{}#{}'.format(user['_id'], userId),
+# 			}
+# 		]
+# 	})
+# 	if payment.create():
+# 		print("Payment created successfully")
+# 		for link in payment.links:
+# 			if link.rel == "approval_url":
+# 				approval_url = str(link.href)
+# 				print("Redirect for approval: %s" % (approval_url))
+# 				bot.send_message(userId, 'Go to this link to complete the order: %s' % (approval_url))
+# 	else:
+# 		bot.send_message(userId, 'Something went wrong')
 
 def see_profile(message, value):
 	userId = message.chat.id
@@ -296,6 +311,38 @@ def gigs(message, value):
 	keyboard.add(InlineKeyboardButton(messages.gigs.buttons[4].text, callback_data=messages.gigs.buttons[4].callback_data))
 
 	bot.send_message(userId, messages.gigs.text.format(gigs[value[0]]['title'], gigs[value[0]]['desc'], gigs[value[0]]['price']), reply_markup=keyboard)
+
+def offers(message, value):
+	userId = message.chat.id
+	try:	
+		offers = collection.find_one({'_id': userId})['offers']
+	except:
+		bot.send_message(userId, 'No offers')
+		back(message)
+		return
+	value[0] = int(value[0])
+
+	keyboard = InlineKeyboardMarkup()
+	keyboard.row(InlineKeyboardButton(messages.offers.buttons[0].text, callback_data=messages.offers.buttons[0].callback_data.format(max(value[0] - 1, 0))),
+				 InlineKeyboardButton(messages.offers.buttons[1].text, callback_data=messages.offers.buttons[1].callback_data.format(min(value[0] + 1, len(gigs) - 1))))
+	keyboard.row(InlineKeyboardButton(messages.offers.buttons[2].text, callback_data=messages.offers.buttons[2].callback_data.format()),
+				 InlineKeyboardButton(messages.offers.buttons[3].text, callback_data=messages.offers.buttons[3].callback_data.format()))
+	keyboard.add(InlineKeyboardButton(messages.gigs.buttons[4].text, callback_data=messages.gigs.buttons[4].callback_data))
+
+	gig = ""
+	token = offers[value[0]]['token']
+	for x in collection.find_one({'gigs.token': token})['gigs']:
+		if x['token'] == token:
+			gig = x
+			break
+
+	bot.send_message(userId, messages.offers.text.format(gig['title'], gig['desc'], gig['price'], offer[value[0]]['duration']), reply_markup=keyboard)
+
+def accept_offer(message, value):
+	userId = message.chat.id
+
+
+
 
 def token_reciever(message, value):
 	userId = message.chat.id
