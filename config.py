@@ -8,31 +8,37 @@ messages = Map({
 	'menu': {
 		'text': "Welcome!",
 		'buttons': [
-			{
-				'text': 'As seller',
-				'callback_data': 'profile_seller',
-			},
-			{
-				'text': 'As buyer',
-				'callback_data': 'profile_buyer',
-			}
-		],
+			[
+				{
+					'text': 'As seller',
+					'callback_data': 'profile_seller',
+				},
+				{
+					'text': 'As buyer',
+					'callback_data': 'profile_buyer',
+				}
+			],
+		]
 	},
 	'profile_buyer': {
 		'text': "Name {}\nPaypal: {}\n",
 		'buttons': [
-			{
-				'text':'Active Orders',
-				'callback_data': 'active_orders',
-			},
-			{
-				'text': 'Search order',
-				'callback_data': 'search_order',
-			},
-			{
-				'text': 'Back',
-				'callback_data': 'back',
-			}
+			[
+				{
+					'text':'Active Orders',
+					'callback_data': 'active_orders',
+				},
+				{
+					'text': 'Search order',
+					'callback_data': 'search_order',
+				}
+			],
+			[
+				{
+					'text': 'Back',
+					'callback_data': 'back',
+				}
+			]
 		],
 	},
 	'search_order': {
