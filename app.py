@@ -1,5 +1,6 @@
 import re
 import os
+import time
 from random import *
 
 import telebot
@@ -47,17 +48,36 @@ def execute():
 	payer_id = request.args['PayerID']
 
 	payment = paypalrestsdk.Payment.find(payment_id)
-	[desc, uid1, uid2] = payment['transactions'][0]['description'].split('#')
+	[desc, uid1, uid2, offer_id] = payment['transactions'][0]['description'].split('#')
 	print(desc, uid1, uid2)
 	if payment.execute({'payer_id': payer_id}):
 		print('Payment was successful')
 		msg = bot.send_message(int(uid2), 'Payment was successful\n Order has been started!')
 
 
+		bot.send_message(int(uid1), 'Order has been started!')
 
+
+		offer = ""
+		seller = collection.find_one({'_id': uid1})
+		for x in seller['offers']:
+			if x['id'] == offer_id:
+				offer = x
+				break
+		order = ""
+		for x in seller['gigs']:
+			if x['token'] == offer['token']:
+				order = x
+				break
+		order['id'] = offer['id']
+		order['duration'] = offer['duration']
+		order['start_date'] = time.time()
+		order['end_date'] = order['start_date'] + toSeconds(order['duration'])
+
+		collection.update_one({'_id': uid1}, {'$push': {'orders': order}, '$pull': {'offers': {'id': offer['id']}}})
 	else:
 		print(payment.error)
-		msg = bot.send_message(int(uid2), 'Payment was successful\n Order has been started!')
+		msg = bot.send_message(int(uid2), 'Something went wrong, try again later')
 	menu(msg)
 
 	return "Payment success!", 200
@@ -68,13 +88,16 @@ def webhook():
 	bot.set_webhook(url=URL + TOKEN)
 	return '!', 200
 
+def toSeconds(x):
+	return x * 24 * 60 * 60
+
 def newId():
 	return str(randint(1, 1e9))
 
 def previous(path):
 	return re.search(r'(.+\/)+', path)[0][:-1]
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=['menu'])
 def menu(message):
 	userId = message.chat.id
 	result = collection.find_one({'_id': userId})
@@ -315,6 +338,8 @@ def offers(message, value):
 def accept_offer(message, value):
 	userId = message.chat.id
 
+	bot.send_message(userId, 'Wait for an order to start')
+
 	seller = collection.find_one({'_id': userId})
 	offer = ""
 	for x in seller['offers']:
@@ -356,7 +381,7 @@ def accept_offer(message, value):
 					'total': '{}.00'.format(gig['price']),
 					'currency': 'USD'
 				},
-				'description': '{}\n\n Duration: {} days#{}#{}'.format(gig['desc'], offer['duration'], seller['_id'], offer['customer']),
+				'description': '{}\n\n Duration: {} days#{}#{}#{}'.format(gig['desc'], offer['duration'], seller['_id'], offer['customer'], offer['id']),
 			}
 		]
 	})
@@ -367,12 +392,23 @@ def accept_offer(message, value):
 				approval_url = str(link.href)
 				print("Redirect for approval: %s" % (approval_url))
 				bot.send_message(offer['customer'], 'Offer {} was accepted\n To begin this order pay using this link {}'.format(offer['id'], approval_url))
-	
-		collection.update_one({'_id': userId}, {'$pull': {'offers.id': offer['id']}})
 	else:
 		bot.send_message(userId, 'Something went wrong')
 
+def decline_offer(message, value):
+	userId = message.chat.id
 
+	bot.send_message(userId, 'Offer was declined')
+
+	seller = collection.find_one({'_id': userId})
+	offer = ""
+	for x in seller['offers']:
+		if x['id'] == value[0]:
+			offer = x
+			break
+	
+	collection.update_one({'_id': uid1}, '$pull': {'offers': {'id': offer['id']}})
+	bot.send_message(offer['customer'], '{} has declined your offer'.format(seller['username']))
 
 def token_reciever(message, value):
 	userId = message.chat.id
