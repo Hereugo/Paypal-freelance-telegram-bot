@@ -140,11 +140,11 @@ messages = Map({
 			},
 			{
 				'text': 'Accept',
-				'callback_data': 'accept_offer{}',
+				'callback_data': 'accept_offer?{}',
 			},
 			{
 				'text': 'Decline',
-				'callback_data': 'decline_offer{}',
+				'callback_data': 'decline_offer?{}',
 			},
 			{
 				'text': 'Back',
