@@ -185,8 +185,9 @@ def create_offer(message, value):
 		bot.register_next_step_handler(msgg, process_create_offer_time_step)
 		return
 
-	collection.update_one({'_id': userId}, {'$set': {'path': previous(path), 'process_order.token': value[0]}})
 	buyer = collection.find_one({'_id': userId})
+	path = buyer['path']
+	collection.update_one({'_id': userId}, {'$set': {'path': previous(path), 'process_order.token': value[0]}})
 
 
 	print(seller, buyer)
