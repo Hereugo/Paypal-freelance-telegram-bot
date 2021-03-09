@@ -322,8 +322,8 @@ def orders(message, value):
 	keyboard = InlineKeyboardMarkup()
 	keyboard.row(InlineKeyboardButton(messages.offers.buttons[0].text, callback_data=messages.offers.buttons[0].callback_data.format(max(value[0] - 1, 0))),
 				 InlineKeyboardButton(messages.offers.buttons[1].text, callback_data=messages.offers.buttons[1].callback_data.format(min(value[0] + 1, len(offers) - 1))))
+	keyboard.add(InlineKeyboardButton(messages.gigs.buttons[2].text, callback_data=messages.gigs.buttons[2].callback_data))
 	keyboard.add(InlineKeyboardButton(messages.gigs.buttons[3].text, callback_data=messages.gigs.buttons[3].callback_data))
-	keyboard.add(InlineKeyboardButton(messages.gigs.buttons[4].text, callback_data=messages.gigs.buttons[4].callback_data))
 
 	bot.send_message(userId, messages.orders.text.format(orders[value[0]]['title'], orders[value[0]]['desc'], orders[value[0]]['price'], orders[value[0]]['duration'], "DD"), reply_markup=keyboard)
 
