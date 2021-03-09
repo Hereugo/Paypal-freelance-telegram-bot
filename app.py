@@ -94,6 +94,7 @@ def menu(message):
 			},
 			'process_order': {
 				'id': newId(),
+				'customer': '#',
 				'token': "#",
 				'duration': "",
 			},
@@ -173,6 +174,12 @@ def process_search_order_step(message, token=""):
 def create_offer(message, value):
 	userId = message.chat.id
 	seller = collection.find_one({'gigs.token': value[0]})
+
+	if seller['_id'] == userId:
+		bot.send_message(userId, 'Cant make an offer to yourself')
+		back(message)
+		return
+
 	gig = ""
 	for x in seller['gigs']:
 		if x['token'] == value[0]:
@@ -187,7 +194,7 @@ def create_offer(message, value):
 
 	buyer = collection.find_one({'_id': userId})
 	path = buyer['path']
-	collection.update_one({'_id': userId}, {'$set': {'path': previous(path), 'process_order.token': value[0]}})
+	collection.update_one({'_id': userId}, {'$set': {'path': previous(path), 'process_order.token': value[0], 'process_order.customer': userId}})
 
 
 	print(seller, buyer)
@@ -224,47 +231,6 @@ def create_offer_complete(message):
 	collection.update_one({'_id': userId}, {'$set': {'process_order': {'id': str(newId()), 'duration': "", 'token': '#'}}}) # Clear process order of buyer
 
 	bot.send_message(seller['_id'], messages.create_offer_complete.text[1].format(buyer['username']))
-
-# ####################
-# 	payment = Payment({
-# 		'intent': 'sale',
-# 		'payer': {
-# 			'payment_method': 'paypal',
-# 		},
-# 		'redirect_urls': {
-# 	        "return_url": URL + "payment/execute/",
-# 	        "cancel_url": URL,
-# 		},
-# 		'transactions': [
-# 			{
-# 				'item_list': {
-# 					'items': [
-# 						{
-# 							'name': gig['title'],
-# 							'sku': "WHAT IS IT SKU",
-# 							'price': '{}.00'.format(gig['price']),
-# 							'currency': 'USD',
-# 							'quantity': 1
-# 						}
-# 					]
-# 				},
-# 				'amount': {
-# 					'total': '{}.00'.format(gig['price']),
-# 					'currency': 'USD'
-# 				},
-# 				'description': gig['desc'] + '\n#{}#{}'.format(user['_id'], userId),
-# 			}
-# 		]
-# 	})
-# 	if payment.create():
-# 		print("Payment created successfully")
-# 		for link in payment.links:
-# 			if link.rel == "approval_url":
-# 				approval_url = str(link.href)
-# 				print("Redirect for approval: %s" % (approval_url))
-# 				bot.send_message(userId, 'Go to this link to complete the order: %s' % (approval_url))
-# 	else:
-# 		bot.send_message(userId, 'Something went wrong')
 
 def see_profile(message, value):
 	userId = message.chat.id
@@ -331,9 +297,9 @@ def offers(message, value):
 
 	keyboard = InlineKeyboardMarkup()
 	keyboard.row(InlineKeyboardButton(messages.offers.buttons[0].text, callback_data=messages.offers.buttons[0].callback_data.format(max(value[0] - 1, 0))),
-				 InlineKeyboardButton(messages.offers.buttons[1].text, callback_data=messages.offers.buttons[1].callback_data.format(min(value[0] + 1, len(gigs) - 1))))
-	keyboard.row(InlineKeyboardButton(messages.offers.buttons[2].text, callback_data=messages.offers.buttons[2].callback_data.format()),
-				 InlineKeyboardButton(messages.offers.buttons[3].text, callback_data=messages.offers.buttons[3].callback_data.format()))
+				 InlineKeyboardButton(messages.offers.buttons[1].text, callback_data=messages.offers.buttons[1].callback_data.format(min(value[0] + 1, len(offers) - 1))))
+	keyboard.row(InlineKeyboardButton(messages.offers.buttons[2].text, callback_data=messages.offers.buttons[2].callback_data.format(offers[value[0]]['id'])),
+				 InlineKeyboardButton(messages.offers.buttons[3].text, callback_data=messages.offers.buttons[3].callback_data.format(offers[value[0]]['id'])))
 	keyboard.add(InlineKeyboardButton(messages.gigs.buttons[4].text, callback_data=messages.gigs.buttons[4].callback_data))
 
 	gig = ""
@@ -343,10 +309,66 @@ def offers(message, value):
 			gig = x
 			break
 
-	bot.send_message(userId, messages.offers.text.format(gig['title'], gig['desc'], gig['price'], offer[value[0]]['duration']), reply_markup=keyboard)
+	print(gig, offers[value[0]])
+	bot.send_message(userId, messages.offers.text.format(gig['title'], gig['desc'], gig['price'], offers[value[0]]['duration']), reply_markup=keyboard)
 
 def accept_offer(message, value):
 	userId = message.chat.id
+
+	seller = collection.find_one({'_id': userId})
+	offer = ""
+	for x in seller.offers:
+		if x['id'] == value[0]:
+			offer = x
+			break
+	gig = ""
+	for x in seller.gigs:
+		if x['token'] == offer['token']:
+			gig = x
+			break
+
+	payment = Payment({
+		'intent': 'sale',
+		'payer': {
+			'payment_method': 'paypal',
+		},
+		'redirect_urls': {
+	        "return_url": URL + "payment/execute/",
+	        "cancel_url": URL,
+		},
+		'transactions': [
+			{
+				'item_list': {
+					'items': [
+						{
+							'name': gig['title'],
+							'sku': "WHAT IS IT SKU",
+							'price': '{}.00'.format(gig['price']),
+							'currency': 'USD',
+							'quantity': 1
+						}
+					]
+				},
+				'amount': {
+					'total': '{}.00'.format(gig['price']),
+					'currency': 'USD'
+				},
+				'description': gig['desc'] + '\n\n Duration: {}#{}#{}'.format(offer['duration'], seller['_id'], buyer['_id']),
+			}
+		]
+	})
+	if payment.create():
+		print("Payment created successfully")
+		for link in payment.links:
+			if link.rel == "approval_url":
+				approval_url = str(link.href)
+				print("Redirect for approval: %s" % (approval_url))
+				bot.send_message(offer['customer'], 'Offer {} was accepted\n To begin this order pay using this link {}'.format(offer['id'], approval_url))
+	
+		collection.update_one({'_id': userId}, {'$pull': {'offers.id': offer['id']}})
+	else:
+		bot.send_message(userId, 'Something went wrong')
+
 
 
 def token_reciever(message, value):
