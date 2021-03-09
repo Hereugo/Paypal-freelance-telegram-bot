@@ -52,6 +52,9 @@ def execute():
 	if payment.execute({'payer_id': payer_id}):
 		print('Payment was successful')
 		msg = bot.send_message(int(uid2), 'Payment was successful\n Order has been started!')
+
+
+
 	else:
 		print(payment.error)
 		msg = bot.send_message(int(uid2), 'Payment was successful\n Order has been started!')
@@ -89,6 +92,10 @@ def menu(message):
 				'price':"", 
 				'token':"#",
 			}
+			'process_order': {
+				'token': "#",
+				'timer': "",
+			},
 		}
 		collection.insert_one(user)
 
@@ -161,7 +168,8 @@ def process_search_order_step(message, token=""):
 
 	bot.send_message(userId, messages.search_order.text.format(gig['title'], gig['desc'], gig['price'], user['name']), reply_markup=keyboard)
 
-def buy_order(message, value):
+
+def create_offer(message, value):
 	userId = message.chat.id
 	user = collection.find_one({'gigs.token': value[0]})
 	gig = ""
@@ -169,6 +177,33 @@ def buy_order(message, value):
 		if x['token'] == value[0]:
 			gig = x
 			break
+
+	if value[1] == '0':
+		msgg = bot.send_message(userId, 'Set your time in days')
+		bot.register_next_step_handler(msgg, process_create_offer_time_step)
+		return
+
+	collection.update_one({'_id': userId}, {'$set': {'path': previous(path)}})
+
+	keyboard = InlineKeyboardMarkup()
+
+	keyboard.add(InlineKeyboardButton(messages.create_offer.buttons[0].text, callback_data=messages.create_offer.buttons[0].callback_data.format(value[0], 0)))
+	keyboard.add(InlineKeyboardButton(messages.create_offer.buttons[1].text, callback_data=messages.create_offer.buttons[1].callback_data))	
+	bot.send_message(userId, messages.create_offer.text.format(gig['title'], gig['desc'], gig['price'], user['name'], ), reply_markup=keyboard)
+def process_create_offer_time_step(message):
+	text = message.text
+	userId = message.chat.id
+
+	user = collection.find_one({'_id': userId})
+	[query, value] = calc(re.search(r'\w+(|\?[^\/]+)$', user['path'])[0])
+	print(query, value, user['path'])
+	if value[1] == '0': # Timer
+		collection.update_one({'_id': userId}, {'$set': {'process_order.timer': text}})
+
+	create_offer(message, [value[0], '9'])
+
+
+####################
 	payment = Payment({
 		'intent': 'sale',
 		'payer': {

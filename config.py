@@ -39,8 +39,8 @@ messages = Map({
 		'text': "{}\n\n{}\n\nPrice: {}\n\nUser: {}",
 		'buttons': [
 			{
-				'text': 'Buy order',
-				'callback_data': 'buy_order?{}',
+				'text': 'Create an offer',
+				'callback_data': 'create_offer?{},9',
 			},
 			{
 				'text': 'See Profile',
@@ -52,6 +52,19 @@ messages = Map({
 			}
 		],
 	},
+	'create_offer': {
+		'text': '{}\n\n{}\n\nPrice: {}\n\nUser: {}\nTime: {} days'
+		'buttons': [
+			{
+				'text': 'Set time',
+				'callback_data': 'create_offer?{},{}',
+			},
+			{
+				'text': 'Back',
+				'callback_data': 'back',
+			}
+		],
+	}
 	'see_profile': {
 		'text': 'Name: {}\n\n{}',
 		'buttons': [
@@ -104,7 +117,7 @@ messages = Map({
 		],
 	},
 	'orders': {
-
+		'text': 'Customer: {}\n Time: {}'
 	},
 	'gigs': {
 		'text': 'Title:{}\n\nDescription:{}\n\n Price:{}',
