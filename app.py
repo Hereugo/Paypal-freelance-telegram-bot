@@ -93,6 +93,7 @@ def menu(message):
 				'token':"#",
 			},
 			'process_order': {
+				'id': newId(),
 				'token': "#",
 				'duration': "",
 			},
