@@ -325,7 +325,9 @@ def orders(message, value):
 	keyboard.add(InlineKeyboardButton(messages.orders.buttons[2].text, callback_data=messages.orders.buttons[2].callback_data))
 	keyboard.add(InlineKeyboardButton(messages.orders.buttons[3].text, callback_data=messages.orders.buttons[3].callback_data))
 
-	bot.send_message(userId, messages.orders.text.format(orders[value[0]]['title'], orders[value[0]]['desc'], orders[value[0]]['price'], orders[value[0]]['duration'], "DD"), reply_markup=keyboard)
+
+	ctime = time.ctime(orders[value[0]]['end_date'] - time.time())
+	bot.send_message(userId, messages.orders.text.format(orders[value[0]]['title'], orders[value[0]]['desc'], orders[value[0]]['price'], orders[value[0]]['duration'], ctime), reply_markup=keyboard)
 
 def offers(message, value):
 	userId = message.chat.id

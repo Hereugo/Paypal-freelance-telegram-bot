@@ -128,7 +128,7 @@ messages = Map({
 		],
 	},
 	'orders': {
-		'text': 'Title: {}\n {}\n\n Price: {}\n Duration: {} days Time left: {}',
+		'text': 'Title: {}\n {}\n\n Price: {}\n Duration: {} days\n Time left: {}',
 		'buttons': [
 			{
 				'text': '<',
