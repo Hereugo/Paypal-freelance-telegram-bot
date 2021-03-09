@@ -70,7 +70,7 @@ def execute():
 				order = x
 				break
 		order['id'] = offer['id']
-		order['duration'] = offer['duration']
+		order['duration'] = int(offer['duration'])
 		order['start_date'] = time.time()
 		order['end_date'] = order['start_date'] + toSeconds(order['duration'])
 
