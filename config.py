@@ -127,6 +127,27 @@ messages = Map({
 			},
 		],
 	},
+	'orders': {
+		'text': 'Title: {}\n {}\n\n Price: {}\n Duration: {} days Time left: {}',
+		'buttons': [
+			{
+				'text': '<',
+				'callback_data': 'orders?{}',
+			},
+			{
+				'text': '>',
+				'callback_data': 'orders?{}',
+			},
+			{
+				'text': 'deliver order',
+				'callback_data': 'deliver_order',
+			},
+			{
+				'text': 'Back',
+				'callback_data': 'back',
+			}
+		]
+	},
 	'offers': {
 		'text': 'Title: {}\n {}\n\n Price: {}\n Duration: {} days',
 		'buttons': [

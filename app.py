@@ -59,7 +59,7 @@ def execute():
 
 
 		offer = ""
-		seller = collection.find_one({'_id': uid1})
+		seller = collection.find_one({'_id': int(uid1)})
 		for x in seller['offers']:
 			if x['id'] == offer_id:
 				offer = x
@@ -74,7 +74,8 @@ def execute():
 		order['start_date'] = time.time()
 		order['end_date'] = order['start_date'] + toSeconds(order['duration'])
 
-		collection.update_one({'_id': uid1}, {'$push': {'orders': order}, '$pull': {'offers': {'id': offer['id']}}})
+		print(order)
+		collection.update_one({'_id': int(uid1)}, {'$push': {'orders': order}, '$pull': {'offers': {'id': offer['id']}}})
 	else:
 		print(payment.error)
 		msg = bot.send_message(int(uid2), 'Something went wrong, try again later')
@@ -307,6 +308,24 @@ def gigs(message, value):
 	keyboard.add(InlineKeyboardButton(messages.gigs.buttons[4].text, callback_data=messages.gigs.buttons[4].callback_data))
 
 	bot.send_message(userId, messages.gigs.text.format(gigs[value[0]]['title'], gigs[value[0]]['desc'], gigs[value[0]]['price']), reply_markup=keyboard)
+
+def orders(message, value):
+	userId = message.chat.id
+	try:	
+		orders = collection.find_one({'_id': userId})['orders']
+	except:
+		bot.send_message(userId, 'No current orders')
+		back(message)
+		return
+
+	value[0] = int(value[0])
+	keyboard = InlineKeyboardMarkup()
+	keyboard.row(InlineKeyboardButton(messages.offers.buttons[0].text, callback_data=messages.offers.buttons[0].callback_data.format(max(value[0] - 1, 0))),
+				 InlineKeyboardButton(messages.offers.buttons[1].text, callback_data=messages.offers.buttons[1].callback_data.format(min(value[0] + 1, len(offers) - 1))))
+	keyboard.add(InlineKeyboardButton(messages.gigs.buttons[3].text, callback_data=messages.gigs.buttons[3].callback_data))
+	keyboard.add(InlineKeyboardButton(messages.gigs.buttons[4].text, callback_data=messages.gigs.buttons[4].callback_data))
+
+	bot.send_message(userId, messages.orders.text.format(orders[value[0]]['title'], orders[value[0]]['desc'], orders[value[0]]['price'], orders[value[0]]['duration'], "DD"), reply_markup=keyboard)
 
 def offers(message, value):
 	userId = message.chat.id
