@@ -126,7 +126,7 @@ def menu(message):
 		collection.insert_one(user)
 
 	collection.update_one({'_id': userId}, {'$set': {'path': 'menu'}})
-
+	print('hello??')
 	buttons = []
 	for lst in messages.menu.buttons:
 		x = []
