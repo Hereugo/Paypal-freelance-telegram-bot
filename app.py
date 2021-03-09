@@ -163,7 +163,6 @@ def profile_buyer(message):
 		return
 
 	keyboard = create_keyboard(messages.profile_buyer.buttons, [empty_key, empty_key, empty_key])
-
 	bot.send_message(userId, messages.profile_buyer.text.format(user['name'], user['paypal_account']), reply_markup=keyboard)
 
 def search_order(message, value=-1):
@@ -194,12 +193,9 @@ def process_search_order_step(message, token=""):
 			gig = x
 			break
 
-	keyboard = InlineKeyboardMarkup()
 	collection.update_one({'_id': userId}, {'$set': {'path': 'menu/profile_buyer/search_order?{}'.format(token)}})
-	keyboard.add(InlineKeyboardButton(messages.search_order.buttons[0].text, callback_data=messages.search_order.buttons[0].callback_data.format(token)))
-	keyboard.add(InlineKeyboardButton(messages.search_order.buttons[1].text, callback_data=messages.search_order.buttons[1].callback_data.format(user['_id'])))
-	keyboard.add(InlineKeyboardButton(messages.search_order.buttons[2].text, callback_data=messages.search_order.buttons[2].callback_data))
 
+	keyboard = create_keyboard(messages.search_order.buttons, [ [[''], [token]], [[''], [user['_id']]], empty_key])
 	bot.send_message(userId, messages.search_order.text.format(gig['title'], gig['desc'], gig['price'], user['name']), reply_markup=keyboard)
 
 
@@ -230,12 +226,8 @@ def create_offer(message, value):
 
 
 	print(seller, buyer)
-	keyboard = InlineKeyboardMarkup()
 
-	keyboard.add(InlineKeyboardButton(messages.create_offer.buttons[0].text, callback_data=messages.create_offer.buttons[0].callback_data.format(value[0], 0)))
-	keyboard.add(InlineKeyboardButton(messages.create_offer.buttons[1].text, callback_data=messages.create_offer.buttons[1].callback_data))
-	keyboard.add(InlineKeyboardButton(messages.create_offer.buttons[2].text, callback_data=messages.create_offer.buttons[2].callback_data))
-
+	keyboard = create_keyboard(messages.create_offer.buttons, [ [[''], [value[0], 0]], empty_key, empty_key])
 	bot.send_message(userId, messages.create_offer.text.format(gig['title'], gig['desc'], gig['price'], seller['name'], buyer['process_order']['duration']), reply_markup=keyboard)
 def process_create_offer_time_step(message):
 	text = message.text
@@ -268,20 +260,14 @@ def see_profile(message, value):
 	userId = message.chat.id
 	user = collection.find_one({'_id': int(value[0])})
 
-	keyboard = InlineKeyboardMarkup()
-	keyboard.add(InlineKeyboardButton(messages.see_profile.buttons[0].text, callback_data=messages.see_profile.buttons[0].callback_data.format(value[0])))
-	keyboard.add(InlineKeyboardButton(messages.see_profile.buttons[1].text, callback_data=messages.see_profile.buttons[1].callback_data))
-	keyboard.add(InlineKeyboardButton(messages.see_profile.buttons[2].text, callback_data=messages.see_profile.buttons[2].callback_data))	
-
+	keyboard = create_keyboard(messages.see_profile.buttons, [[[''], [value[0]]], empty_key, empty_key])
 	bot.send_message(userId, messages.see_profile.text.format(user['name'], user['profile_desc']), reply_markup=keyboard)
 
 def start_conversation(message, value): 
 	userId = message.chat.id
 	user = collection.find_one({'_id': int(value[0])})
 
-	keyboard = InlineKeyboardMarkup()
-	for button in messages.start_conversation.buttons:
-		keyboard.add(InlineKeyboardButton(button.text, callback_data=button.callback_data))
+	keyboard = create_keyboard(messages.start_conversation.buttons, [empty_key])
 	bot.send_message(userId, messages.start_conversation.text.format(user['username']), reply_markup=keyboard)
 
 ####### SELLERS SYSTEM ########
@@ -291,9 +277,7 @@ def profile_seller(message):
 	if checkRegistration(message, user):
 		return
 
-	keyboard = InlineKeyboardMarkup()
-	for button in messages.profile_seller.buttons:
-		keyboard.add(InlineKeyboardButton(button.text, callback_data=button.callback_data))
+	keyboard = create_keyboard(messages.profile_seller.buttons, [empty_key, empty_key, empty_key, empty_key, empty_key, empty_key])
 	bot.send_message(userId, messages.profile_seller.text.format(user['name'], user['paypal_account'], user['profile_desc']), reply_markup=keyboard)
 
 def gigs(message, value):
@@ -327,13 +311,7 @@ def orders(message, value):
 		return
 
 	value[0] = int(value[0])
-	keyboard = InlineKeyboardMarkup()
-	keyboard.row(InlineKeyboardButton(messages.orders.buttons[0].text, callback_data=messages.orders.buttons[0].callback_data.format(max(value[0] - 1, 0))),
-				 InlineKeyboardButton(messages.orders.buttons[1].text, callback_data=messages.orders.buttons[1].callback_data.format(min(value[0] + 1, len(orders) - 1))))
-	keyboard.add(InlineKeyboardButton(messages.orders.buttons[2].text, callback_data=messages.orders.buttons[2].callback_data))
-	keyboard.add(InlineKeyboardButton(messages.orders.buttons[3].text, callback_data=messages.orders.buttons[3].callback_data))
-
-
+	keyboard = create_keyboard(messages.orders.buttons, [ [[''], [max(value[0] - 1, 0)]], [[''], [min(value[0] + 1, len(orders) - 1)]], empty_key, empty_key])
 	ctime = time.ctime(orders[value[0]]['end_date'] - time.time())
 	bot.send_message(userId, messages.orders.text.format(orders[value[0]]['title'], orders[value[0]]['desc'], orders[value[0]]['price'], orders[value[0]]['duration'], ctime), reply_markup=keyboard)
 
@@ -347,12 +325,8 @@ def offers(message, value):
 		return
 	value[0] = int(value[0])
 
-	keyboard = InlineKeyboardMarkup()
-	keyboard.row(InlineKeyboardButton(messages.offers.buttons[0].text, callback_data=messages.offers.buttons[0].callback_data.format(max(value[0] - 1, 0))),
-				 InlineKeyboardButton(messages.offers.buttons[1].text, callback_data=messages.offers.buttons[1].callback_data.format(min(value[0] + 1, len(offers) - 1))))
-	keyboard.row(InlineKeyboardButton(messages.offers.buttons[2].text, callback_data=messages.offers.buttons[2].callback_data.format(offers[value[0]]['id'])),
-				 InlineKeyboardButton(messages.offers.buttons[3].text, callback_data=messages.offers.buttons[3].callback_data.format(offers[value[0]]['id'])))
-	keyboard.add(InlineKeyboardButton(messages.gigs.buttons[4].text, callback_data=messages.gigs.buttons[4].callback_data))
+	vals = [ [[''], [max(value[0] - 1, 0)]], [[''], [min(value[0] + 1, len(offers) - 1)]], [[''], [offers[value[0]]['id']]], [[''], [offers[value[0]]['id']]], empty_key]
+	keyboard = create_keyboard(messages.offers.buttons, vals)
 
 	gig = ""
 	token = offers[value[0]]['token']
@@ -361,7 +335,6 @@ def offers(message, value):
 			gig = x
 			break
 
-	print(gig, offers[value[0]])
 	bot.send_message(userId, messages.offers.text.format(gig['title'], gig['desc'], gig['price'], offers[value[0]]['duration']), reply_markup=keyboard)
 
 def accept_offer(message, value):
@@ -375,13 +348,11 @@ def accept_offer(message, value):
 		if x['id'] == value[0]:
 			offer = x
 			break
-	print(offer)
 	gig = ""
 	for x in seller['gigs']:
 		if x['token'] == offer['token']:
 			gig = x
 			break
-	print(gig)
 
 
 	payment = Payment({
@@ -443,9 +414,8 @@ def token_reciever(message, value):
 	userId = message.chat.id
 	value = int(value[0])
 	gig = collection.find_one({'_id': userId})['gigs'][value]
-	keyboard = InlineKeyboardMarkup()
-	for button in messages.token_reciever.buttons:
-		keyboard.add(InlineKeyboardButton(button.text, callback_data=button.callback_data))
+
+	keyboard = create_keyboard(messages.token_reciever.buttons, [empty_key])
 	bot.send_message(userId, messages.token_reciever.text.format(gig['token']), reply_markup=keyboard)
 
 def edit_gig(message, value):
@@ -476,9 +446,8 @@ def create_new_gig(message, value):
 
 	collection.update_one({'_id': userId}, {'$set': {'path': previous(path)}})
 
-	keyboard = InlineKeyboardMarkup()
-	for button in messages.create_new_gig.buttons:
-		keyboard.add(InlineKeyboardButton(button.text, callback_data=button.callback_data))
+
+	keyboard = create_keyboard(messages.create_new_gig.buttons, [empty_key, empty_key, empty_key, empty_key, empty_key])
 
 	gig = collection.find_one({'_id': userId})['process_gig']
 	bot.send_message(userId, messages.create_new_gig.text.format(gig['title'], gig['desc'], gig['price']), reply_markup=keyboard)
@@ -537,9 +506,8 @@ def register(message, value):
 		return
 
 	collection.update_one({'_id': userId}, {'$set': {'path': previous(path)}})
-	keyboard = InlineKeyboardMarkup()
-	for button in messages.register.buttons:
-		keyboard.add(InlineKeyboardButton(button.text, callback_data=button.callback_data))
+
+	keyboard = create_keyboard(messages.register.buttons, [empty_key, empty_key, empty_key, empty_key, empty_key])
 
 	user = collection.find_one({'_id': userId})
 	bot.send_message(userId, messages.register.text.format(user['name'], user['paypal_account'], user['profile_desc']), reply_markup=keyboard)
