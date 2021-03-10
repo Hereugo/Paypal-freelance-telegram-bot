@@ -105,7 +105,8 @@ def create_keyboard(arr, vals):
 	for lst in arr:
 		buttons = []
 		for button in lst:
-			buttons.append(InlineKeyboardButton(button.text.format(*vals[i][0]), callback_data=button.callback_data.format(*vals[i][1])))
+			if len(vals[i]) != 3 or vals[i][2]['show'] == '1':
+				buttons.append(InlineKeyboardButton(button.text.format(*vals[i][0]), callback_data=button.callback_data.format(*vals[i][1])))
 			i = i + 1
 		keyboard.row(*buttons)
 	return keyboard
@@ -291,14 +292,9 @@ def gigs(message, value):
 	value[0] = int(value[0])
 
 	keyboard = InlineKeyboardMarkup()
-	keyboard.row_width = 3
-	keyboard.row(InlineKeyboardButton(messages.gigs.buttons[0].text, callback_data=messages.gigs.buttons[0].callback_data.format(max(value[0] - 1, 0), value[1])),
-				 InlineKeyboardButton(messages.gigs.buttons[2].text, callback_data=messages.gigs.buttons[2].callback_data.format(min(value[0] + 1, len(gigs) - 1), value[1])))
-	if value[1] == '1':
-		keyboard.add(InlineKeyboardButton(messages.gigs.buttons[1].text, callback_data=messages.gigs.buttons[1].callback_data.format(value[0])))
-	keyboard.add(InlineKeyboardButton(messages.gigs.buttons[3].text, callback_data=messages.gigs.buttons[3].callback_data.format(value[0])))
-	keyboard.add(InlineKeyboardButton(messages.gigs.buttons[4].text, callback_data=messages.gigs.buttons[4].callback_data))
 
+	vals = [[[''], [max(value[0] - 1, 0), value[1]]], [[''], [min(value[0] + 1, len(gigs) - 1), value[1]]], [[''], [value[0]], {'show': value[1]}], [[''], [value[0]]], empty_key]
+	keyboard = create_keyboard(messages.gigs.buttons, vals)
 	bot.send_message(userId, messages.gigs.text.format(gigs[value[0]]['title'], gigs[value[0]]['desc'], gigs[value[0]]['price']), reply_markup=keyboard)
 
 def orders(message, value):
