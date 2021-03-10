@@ -291,11 +291,20 @@ messages = Map({
 			],
 			[
 				{
+					'text': 'Delete gig',
+					'callback_data': 'delete_gig?{}'
+				}
+			],
+			[
+				{
 					'text': 'Back',
 					'callback_data': 'back',
 				}
 			]
 		],
+	},
+	'delete_gig': {
+		'text': 'Gig has been deleted'
 	},
 	'register': {
 		'text': "Name: {}\nPaypal: {}\n\nDescription: {}",

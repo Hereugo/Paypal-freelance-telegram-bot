@@ -285,10 +285,15 @@ def gigs(message, value):
 	userId = message.chat.id
 	try:	
 		gigs = collection.find_one({'_id': userId})['gigs']
+		if len(gigs) == 0:
+			bot.send_message(userId, 'No gigs were made')
+			back(message)
+			return
 	except:
 		bot.send_message(userId, 'No gigs were made')
 		back(message)
 		return
+
 	value[0] = int(value[0])
 
 	keyboard = InlineKeyboardMarkup()
@@ -301,6 +306,10 @@ def orders(message, value):
 	userId = message.chat.id
 	try:	
 		orders = collection.find_one({'_id': userId})['orders']
+		if len(orders) == 0:
+			bot.send_message(userId, 'No current orders')
+			back(message)
+			return
 	except:
 		bot.send_message(userId, 'No current orders')
 		back(message)
@@ -315,11 +324,17 @@ def offers(message, value):
 	userId = message.chat.id
 	try:	
 		offers = collection.find_one({'_id': userId})['offers']
+		if len(offers) == 0:
+			bot.send_message(userId, 'No offers were found')
+			back(message)
+			return
 	except:
-		bot.send_message(userId, 'No offers')
+		bot.send_message(userId, 'No offers were found')
 		back(message)
 		return
 	value[0] = int(value[0])
+	if value[0] - 1 < 0 or value[0] + 1 > len(offers) - 1:
+		value[0] = 0
 
 	vals = [ [[''], [max(value[0] - 1, 0)]], [[''], [min(value[0] + 1, len(offers) - 1)]], [[''], [offers[value[0]]['id']]], [[''], [offers[value[0]]['id']]], empty_key]
 	keyboard = create_keyboard(messages.offers.buttons, vals)
@@ -337,6 +352,7 @@ def accept_offer(message, value):
 	userId = message.chat.id
 
 	bot.send_message(userId, 'Wait for an order to start')
+	menu(message)
 
 	seller = collection.find_one({'_id': userId})
 	offer = ""
@@ -395,6 +411,7 @@ def decline_offer(message, value):
 	userId = message.chat.id
 
 	bot.send_message(userId, 'Offer was declined')
+	back(message)
 
 	seller = collection.find_one({'_id': userId})
 	offer = ""
@@ -442,11 +459,18 @@ def create_new_gig(message, value):
 
 	collection.update_one({'_id': userId}, {'$set': {'path': previous(path)}})
 
-
-	keyboard = create_keyboard(messages.create_new_gig.buttons, [empty_key, empty_key, empty_key, empty_key, empty_key])
-
 	gig = collection.find_one({'_id': userId})['process_gig']
+
+	vals = [empty_key, empty_key, empty_key, empty_key, [[''], [gig['token']], {'show': '1' if gig['token'] != '#' else '#'}], empty_key]
+	keyboard = create_keyboard(messages.create_new_gig.buttons, vals)
 	bot.send_message(userId, messages.create_new_gig.text.format(gig['title'], gig['desc'], gig['price']), reply_markup=keyboard)
+
+def delete_gig(message, value):
+	userId = message.chat.id
+	collection.update_one({'_id': userId}, {'$pull': {'gigs': {'token': value[0]}}})
+
+	bot.send_message(userId, messages.delete_gig.text)
+	menu(message)
 
 def process_create_new_gig_step(message):
 	text = message.text
