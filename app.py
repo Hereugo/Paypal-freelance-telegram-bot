@@ -116,7 +116,7 @@ def create_keyboard(arr, vals):
 		keyboard.row(*buttons)
 	return keyboard
 
-@bot.message_handler(commands=['menu'])
+@bot.message_handler(commands=['start'])
 def menu(message):
 	userId = message.chat.id
 	result = collection.find_one({'_id': userId})
