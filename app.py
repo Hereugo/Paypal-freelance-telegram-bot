@@ -70,13 +70,18 @@ def execute():
 			if x['token'] == offer['token']:
 				order = x
 				break
+
+		order['buyer_id'] = int(uid2)
+		order['seller_id'] = int(uid1)
 		order['id'] = offer['id']
+		order['status'] = 'open'
 		order['duration'] = int(offer['duration'])
 		order['start_date'] = time.time()
 		order['end_date'] = order['start_date'] + toSeconds(order['duration'])
 
 		print(order)
-		collection.update_one({'_id': int(uid1)}, {'$push': {'orders': order}, '$pull': {'offers': {'id': offer['id']}}})
+		collection.update_one({'_id': int(uid1)}, {'$push': {'seller_orders': order}, '$pull': {'offers': {'id': offer['id']}}})
+		collection.update_one({'_id': int(uid2)}, {'$push': {'buyer_orders': order}})
 	else:
 		print(payment.error)
 		msg = bot.send_message(int(uid2), 'Something went wrong, try again later')
@@ -305,7 +310,7 @@ def gigs(message, value):
 def orders(message, value):
 	userId = message.chat.id
 	try:	
-		orders = collection.find_one({'_id': userId})['orders']
+		orders = collection.find_one({'_id': userId})['{}_orders'.format(value[1])]
 		if len(orders) == 0:
 			bot.send_message(userId, 'No current orders')
 			back(message)
@@ -316,9 +321,15 @@ def orders(message, value):
 		return
 
 	value[0] = int(value[0])
-	keyboard = create_keyboard(messages.orders.buttons, [ [[''], [max(value[0] - 1, 0)]], [[''], [min(value[0] + 1, len(orders) - 1)]], empty_key, empty_key])
+	vals = [[[''], [max(value[0] - 1, 0), value[1]]], 
+			[[''], [min(value[0] + 1, len(orders) - 1), value[1]]], 
+			[[''], [orders[value[0]]['seller_id']], {'show': '1' if value[1] == 'buyer' else '2'}], 
+			[[''], [orders[value[0]]['id']], {'show': '1' if value[1] == 'buyer' else '2'}], 
+			[[''], [''], {'show': '1' if value[1] == 'seller' else '2'}], 
+			empty_key]
+	keyboard = create_keyboard(messages.orders.buttons, vals)
 	ctime = time.ctime(orders[value[0]]['end_date'] - time.time())
-	bot.send_message(userId, messages.orders.text.format(orders[value[0]]['title'], orders[value[0]]['desc'], orders[value[0]]['price'], orders[value[0]]['duration'], ctime), reply_markup=keyboard)
+	bot.send_message(userId, messages.orders.text.format(orders[value[0]]['status'], orders[value[0]]['title'], orders[value[0]]['desc'], orders[value[0]]['price'], orders[value[0]]['duration'], ctime), reply_markup=keyboard)
 
 def offers(message, value):
 	userId = message.chat.id

@@ -25,8 +25,8 @@ messages = Map({
 		'buttons': [
 			[
 				{
-					'text':'Active Orders',
-					'callback_data': 'active_orders',
+					'text': 'Orders',
+					'callback_data': 'orders?0,buyer',
 				},
 				{
 					'text': 'Search order',
@@ -129,8 +129,8 @@ messages = Map({
 		'buttons': [
 			[
 				{
-					'text': 'Active orders',
-					'callback_data': 'orders?0',
+					'text': 'Orders',
+					'callback_data': 'orders?0,seller',
 				},
 				{
 					'text': 'Offers',
@@ -162,16 +162,28 @@ messages = Map({
 		],
 	},
 	'orders': {
-		'text': 'Title: {}\n {}\n\n Price: {}\n Duration: {} days\n Time left: {}',
+		'text': 'Project status: {}\n\nTitle: {}\n {}\n\n Price: {}\n Duration: {} days\n Time left: {}',
 		'buttons': [
 			[
 				{
 					'text': '<',
-					'callback_data': 'orders?{}',
+					'callback_data': 'orders?{},{}',
 				},
 				{
 					'text': '>',
-					'callback_data': 'orders?{}',
+					'callback_data': 'orders?{},{}',
+				}
+			],
+			[
+				{
+					'text': 'Start a conversation',
+					'callback_data': 'start_conversation?{}',
+				}
+			],
+			[
+				{
+					'text': 'File a dispute',
+					'callback_data': 'dispute?{}',
 				}
 			],
 			[
