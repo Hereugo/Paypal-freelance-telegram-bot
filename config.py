@@ -189,7 +189,7 @@ messages = Map({
 			[
 				{
 					'text': 'deliver order',
-					'callback_data': 'deliver_order',
+					'callback_data': 'deliver_order?{}',
 				}
 			],
 			[
@@ -199,6 +199,23 @@ messages = Map({
 				}
 			]
 		],
+	},
+	'deliver_order': {
+		'text': ['Order {} was completed by {}, mark it complete to finish the order', 'Wait for {} to mark your order complete or decline'],
+		'buttons': [
+			[
+				{
+					'text': 'Complete',
+					'callback_data': 'deliver_order_complete?{}',
+				}
+			],
+			[
+				{
+					'text': 'Decline',
+					'callback_data': 'deliver_order_decline?{}',
+				}
+			]
+		]
 	},
 	'offers': {
 		'text': 'Title: {}\n {}\n\n Price: {}\n Duration: {} days',
