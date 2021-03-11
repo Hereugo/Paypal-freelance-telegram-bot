@@ -3,9 +3,11 @@ import os
 import time
 from random import *
 
+import random
+import string
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-from config import TOKEN, messages
+from config import TOKEN, messages, URI, URL, CLIENT_ID, CLIENT_SECRET
 from functions import Map
 
 import pymongo
@@ -21,8 +23,6 @@ from flask_pymongo import PyMongo
 bot = telebot.TeleBot(TOKEN)
 
 # Flask
-URI = 'mongodb+srv://Amir:2LSCfSNcwAz9x3!@cluster0.jxsw1.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
-URL = 'https://paypal-telegram-fiverr-bot.herokuapp.com/'
 app = Flask(__name__)
 cluster = PyMongo(app, uri=URI)
 collection = cluster.db.user
@@ -33,8 +33,8 @@ empty_key = [[''], ['']]
 # Paypal python sdk
 paypalrestsdk.configure({
 	"mode": "sandbox", # sandbox or live
-	"client_id": "AW7Q6ChzzOnd5wa8OuYbiP5RiaqQ6tumVR7UTlMLaDIF_FXRhxo77BaNmjgQfKN6GBLK5c2rDHiijpHv",
-	"client_secret": "EBBmQczfJM6WrweaUE-NDMOxpBn__GH_RXtXQB1nwt8AN6doaa7MBEYuf3ok6EREj8AsrL7Eg7vSE4wM",
+	"client_id": CLIENT_ID,
+	"client_secret": CLIENT_SECRET,
 })
 
 
