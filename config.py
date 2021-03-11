@@ -5,6 +5,8 @@ URI = 'mongodb+srv://Amir:2LSCfSNcwAz9x3!@cluster0.jxsw1.mongodb.net/myFirstData
 URL = 'https://paypal-telegram-fiverr-bot.herokuapp.com/'
 CLIENT_ID = "AW7Q6ChzzOnd5wa8OuYbiP5RiaqQ6tumVR7UTlMLaDIF_FXRhxo77BaNmjgQfKN6GBLK5c2rDHiijpHv"
 CLIENT_SECRET = "EBBmQczfJM6WrweaUE-NDMOxpBn__GH_RXtXQB1nwt8AN6doaa7MBEYuf3ok6EREj8AsrL7Eg7vSE4wM"
+CURRENCY = "USD"
+
 # PATH SYSTEM
 
 messages = Map({
@@ -45,7 +47,7 @@ messages = Map({
 		],
 	},
 	'search_order': {
-		'text': "{}\n\n{}\n\nPrice: {}\n\nUser: {}",
+		'text': "{}\n\n{}\n\nPrice: {} "+CURRENCY+"\n\nUser: {}",
 		'buttons': [
 			[
 				{
@@ -68,7 +70,7 @@ messages = Map({
 		],
 	},
 	'create_offer': {
-		'text': '{}\n\n{}\n\nPrice: {}\n\nUser: {}\nTime: {} days',
+		'text': '{}\n\n{}\n\nPrice: {} '+CURRENCY+'\n\nUser: {}\nDuration: {} days',
 		'buttons': [
 			[	
 				{
@@ -165,7 +167,7 @@ messages = Map({
 		],
 	},
 	'orders': {
-		'text': 'Project status: {}\n\nTitle: {}\n {}\n\n Price: {}\n Duration: {} days\n Time left: {}',
+		'text': 'Project status: {}\n\nTitle: {}\n {}\n\n Price: {} '+CURRENCY+'\n Duration: {} days\n Time left: {}',
 		'buttons': [
 			[
 				{
@@ -221,7 +223,7 @@ messages = Map({
 		]
 	},
 	'offers': {
-		'text': 'Title: {}\n {}\n\n Price: {}\n Duration: {} days',
+		'text': 'Title: {}\n {}\n\n Price: {} '+CURRENCY+'\n Duration: {} days',
 		'buttons': [
 			[
 				{
@@ -252,7 +254,7 @@ messages = Map({
 		],
 	},
 	'gigs': {
-		'text': 'Title: {}\n\nDescription: {}\n\n Price: {}',
+		'text': 'Title: {}\n\nDescription: {}\n\n Price: {} '+CURRENCY,
 		'buttons': [
 			[
 				{
@@ -297,7 +299,7 @@ messages = Map({
 		],
 	},
 	'create_new_gig': {
-		'text': 'Title:{}\n\nDescription:{}\n\n Price:{}',
+		'text': 'Title:{}\n\nDescription:{}\n\n Price:{} '+CURRENCY,
 		'buttons': [
 			[
 				{
@@ -339,7 +341,7 @@ messages = Map({
 		'text': 'Gig has been deleted'
 	},
 	'register': {
-		'text': "Name: {}\nPaypal: {}\n\nDescription: {}",
+		'text': "Name: {}\nPaypal: {} "+CURRENCY+"\n\nDescription: {}",
 		'buttons': [
 			[
 				{

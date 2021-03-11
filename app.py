@@ -7,7 +7,7 @@ import random
 import string
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-from config import TOKEN, messages, URI, URL, CLIENT_ID, CLIENT_SECRET
+from config import TOKEN, messages, URI, URL, CLIENT_ID, CLIENT_SECRET, CURRENCY
 from functions import Map
 
 import pymongo
@@ -370,7 +370,7 @@ def deliver_order_complete(message, value):
 	            "recipient_type": "EMAIL",
 	            "amount": {
 	                "value": int(order['price']) * 0.9, # 10% of the order is left in admins account
-	                "currency": "USD"
+	                "currency": CURRENCY
 	            },
 	            "receiver": seller['paypal_account'],
 	            "note": "Thank you.",
@@ -491,14 +491,14 @@ def accept_offer(message, value):
 							'name': gig['title'],
 							'sku': "WHAT IS IT SKU",
 							'price': '{}.00'.format(gig['price']),
-							'currency': 'USD',
+							'currency': CURRENCY,
 							'quantity': 1
 						}
 					]
 				},
 				'amount': {
 					'total': '{}.00'.format(gig['price']),
-					'currency': 'USD'
+					'currency': CURRENCY
 				},
 				'description': '{}\n\n Duration: {} days#{}#{}#{}'.format(gig['desc'], offer['duration'], seller['_id'], offer['customer'], offer['id']),
 			}
