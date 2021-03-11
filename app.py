@@ -326,7 +326,7 @@ def orders(message, value):
 			[[''], [min(value[0] + 1, len(orders) - 1), value[1]]], 
 			[[''], [orders[value[0]]['seller_id']], {'show': '1' if value[1] == 'buyer' else '2'}], 
 			[[''], [orders[value[0]]['id']], {'show': '1' if value[1] == 'buyer' and orders[value[0]]['status'] == 'pending' else '2'}], 
-			[[''], [orders[value[0]]['id']], {'show': '1' if value[1] == 'seller' else '2'}], 
+			[[''], [orders[value[0]]['id']], {'show': '1' if value[1] == 'seller' and orders[value[0]]['status'] != 'complete' else '2'}], 
 			empty_key]
 	keyboard = create_keyboard(messages.orders.buttons, vals)
 	ctime = time.ctime(orders[value[0]]['end_date'] - time.time())
@@ -658,6 +658,8 @@ def process_register_step(message):
 def register_complete(message):
 	userId = message.chat.id
 
+	print(message)
+	
 	user = collection.find_one({'_id': userId})
 	if user['name'] == '' or user['paypal_account'] == '':
 		bot.send_message('Fill in your profile')
