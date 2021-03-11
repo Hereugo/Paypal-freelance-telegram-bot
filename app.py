@@ -12,7 +12,7 @@ import pymongo
 from pymongo import MongoClient
 
 import paypalrestsdk
-from paypalrestsdk import Payment
+from paypalrestsdk import Payment, Payout
 
 from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
@@ -419,6 +419,7 @@ def file_dispute_complete(message):
 			break
 
 	bot.send_message(seller['_id'], '{} buyer has disputed the order, responed to the buyer in 24 hours'.format(buyer['username']))
+	bot.send_message(seller['_id'], text)
 	bot.send_message(userId, 'Dispute was send to the seller {}'.format(seller['username']))
 
 	collection.update_one({'seller_orders.id': value[0]}, {'$set': {'seller_orders.$.status': 'on hold'}})
