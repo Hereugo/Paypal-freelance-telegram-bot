@@ -100,7 +100,7 @@ def toSeconds(x):
 	return x * 24 * 60 * 60
 
 def newId():
-	return str(randint(1, 1e9))
+	return ''.join(random.choice(string.ascii_uppercase) for i in range(12))
 
 def previous(path):
 	return re.search(r'(.+\/)+', path)[0][:-1]
@@ -359,7 +359,7 @@ def deliver_order_complete(message, value):
 	collection.update_one({'_id': userId, 'buyer_orders.id': value[0]}, {'$set': {'buyer_orders.$.status': 'complete'}})
 	buyer = collection.find_one({'_id': order['buyer_id']})
 
-	sender_batch_id = ''.join(random.choice(string.ascii_uppercase) for i in range(12))
+	sender_batch_id = newId()
 	payout = Payout({
 	    "sender_batch_header": {
 	        "sender_batch_id": sender_batch_id,
@@ -659,7 +659,7 @@ def register_complete(message):
 	userId = message.chat.id
 
 	print(message)
-	
+
 	user = collection.find_one({'_id': userId})
 	if user['name'] == '' or user['paypal_account'] == '':
 		bot.send_message('Fill in your profile')
@@ -667,7 +667,7 @@ def register_complete(message):
 		return
 	val = {
 		'path': 'menu',
-		'username': message.from_user.username,
+		'username': message.chat.username,
 		'registered': True,
 	}
 	collection.update_one({'_id': userId}, {'$set': val}) # set profile description
