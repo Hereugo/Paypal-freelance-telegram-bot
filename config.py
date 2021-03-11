@@ -183,7 +183,7 @@ messages = Map({
 			[
 				{
 					'text': 'File a dispute',
-					'callback_data': 'dispute?{}',
+					'callback_data': 'file_dispute?{}',
 				}
 			],
 			[

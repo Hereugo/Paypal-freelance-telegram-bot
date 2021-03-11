@@ -26,6 +26,7 @@ URL = 'https://paypal-telegram-fiverr-bot.herokuapp.com/'
 app = Flask(__name__)
 cluster = PyMongo(app, uri=URI)
 collection = cluster.db.user
+collection_dispute = cluster.db.dispute
 
 empty_key = [[''], ['']]
 
@@ -324,7 +325,7 @@ def orders(message, value):
 	vals = [[[''], [max(value[0] - 1, 0), value[1]]], 
 			[[''], [min(value[0] + 1, len(orders) - 1), value[1]]], 
 			[[''], [orders[value[0]]['seller_id']], {'show': '1' if value[1] == 'buyer' else '2'}], 
-			[[''], [orders[value[0]]['id']], {'show': '1' if value[1] == 'buyer' and orders[value[0]]['status'] == 'complete' else '2'}], 
+			[[''], [orders[value[0]]['id']], {'show': '1' if value[1] == 'buyer' and orders[value[0]]['status'] == 'pending' else '2'}], 
 			[[''], [orders[value[0]]['id']], {'show': '1' if value[1] == 'seller' else '2'}], 
 			empty_key]
 	keyboard = create_keyboard(messages.orders.buttons, vals)
@@ -338,20 +339,92 @@ def deliver_order(message, value):
 			order = x
 			break
 	buyer = collection.find_one({'_id': order['buyer_id']})
+	collection.update_one({'seller_orders.id': value[0]}, {'$set': {'seller_orders.$.status': 'pending'}})
+	collection.update_one({'buyer_orders.id': value[0]}, {'$set': {'buyer_orders.$.status': 'pending'}})
 
 	keyboard = create_keyboard(messages.deliver_order.buttons, [[[''],[value[0]]], [[''],[value[0]]]])
 	bot.send_message(order['buyer_id'], messages.deliver_order.text[0].format(value[0], seller['username']), reply_markup=keyboard)
-
 	bot.send_message(order['seller_id'], messages.deliver_order.text[1].format(buyer['username']))
 	menu(message)
 
-# def deliver_order_complete(message, value):
-# 	seller = collection.find_one({'seller_orders.id': value[0]})
-# 	for x in seller['seller_orders']:
-# 		if x['id'] == value[0]:
-# 			order = x
-# 			break
-# 	buyer = collection.find_one({'_id': order['buyer_id']})
+def deliver_order_complete(message, value):
+	userId = message.chat.id
+	seller = collection.find_one({'seller_orders.id': value[0]})
+	for x in seller['seller_orders']:
+		if x['id'] == value[0]:
+			order = x
+			break
+
+	collection.update_one({'seller_orders.id': value[0]}, {'$set': {'seller_orders.$.status': 'complete'}})
+	collection.update_one({'_id': userId, 'buyer_orders.id': value[0]}, {'$set': {'buyer_orders.$.status': 'complete'}})
+	buyer = collection.find_one({'_id': order['buyer_id']})
+
+	sender_batch_id = ''.join(random.choice(string.ascii_uppercase) for i in range(12))
+	payout = Payout({
+	    "sender_batch_header": {
+	        "sender_batch_id": sender_batch_id,
+	        "email_subject": "Order was completed"
+	    },
+	    "items": [
+	        {
+	            "recipient_type": "EMAIL",
+	            "amount": {
+	                "value": order['price'] * 0.9, # 10% of the order is left in admins account
+	                "currency": "USD"
+	            },
+	            "receiver": seller['paypal_account'],
+	            "note": "Thank you.",
+	            "sender_item_id": "item_1"
+	        }
+	    ]
+	})
+	if payout.create():
+		bot.send_message(buyer['_id'], 'Thank you for using our services!')
+		bot.send_message(seller['_id'], 'Order was completed, payment was done through your paypal')
+
+		print("payout[%s] created successfully" % (payout.batch_header.payout_batch_id))
+	else:
+		bot.send_message(seller['_id'], 'Something went wrong, please check if your paypal account correctly written')
+		bot.send_message(buyer['_id'], 'Something went wrong, please continue when seller has fixed his issue')
+		print(payout.error)
+
+def deliver_order_declined(message, value):
+	userId = message.chat.id
+	seller = collection.find_one({'seller_orders.id': value[0]})
+	for x in seller['seller_orders']:
+		if x['id'] == value[0]:
+			order = x
+			break
+	buyer = collection.find_one({'_id': order['buyer_id']})
+
+	bot.send_message(seller['_id'], 'Your delivery was declined')
+	bot.send_message(buyer['_id'], 'Delivery declined')
+
+def file_dispute(message, value):
+	userId = message.chat.id
+	msg = bot.send_message(userId, 'Send what problem did your have')
+	bot.register_next_step_handler(msg, file_dispute_complete)
+
+def file_dispute_complete(message):
+	text = message.text
+	userId = message.chat.id
+
+	buyer = collection.find_one({'_id': userId})
+	[query, value] = calc(re.search(r'\w+(|\?[^\/]+)$', buyer['path'])[0])
+	print(query, value, buyer['path'], 'buyer')
+	seller = collection.find_one({'seller_orders.id': value[0]})
+	for x in seller['seller_orders']:
+		if x['id'] == value[0]:
+			order = x
+			break
+
+	bot.send_message(seller['_id'], '{} buyer has disputed the order, responed to the buyer in 24 hours'.format(buyer['username']))
+	bot.send_message(userId, 'Dispute was send to the seller {}'.format(seller['username']))
+
+	collection.update_one({'seller_orders.id': value[0]}, {'$set': {'seller_orders.$.status': 'on hold'}})
+	collection.update_one({'_id': userId, 'buyer_orders.id': value[0]}, {'$set': {'buyer_orders.$.status': 'on hold'}})
+
+	collection_dispute.insert_one(order)
 
 def offers(message, value):
 	userId = message.chat.id
