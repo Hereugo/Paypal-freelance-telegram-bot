@@ -369,7 +369,7 @@ def deliver_order_complete(message, value):
 	        {
 	            "recipient_type": "EMAIL",
 	            "amount": {
-	                "value": order['price'] * 0.9, # 10% of the order is left in admins account
+	                "value": int(order['price']) * 0.9, # 10% of the order is left in admins account
 	                "currency": "USD"
 	            },
 	            "receiver": seller['paypal_account'],
