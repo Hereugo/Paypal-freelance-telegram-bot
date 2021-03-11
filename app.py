@@ -388,7 +388,7 @@ def deliver_order_complete(message, value):
 		bot.send_message(buyer['_id'], 'Something went wrong, please continue when seller has fixed his issue')
 		print(payout.error)
 
-def deliver_order_declined(message, value):
+def deliver_order_decline(message, value):
 	userId = message.chat.id
 	seller = collection.find_one({'seller_orders.id': value[0]})
 	for x in seller['seller_orders']:
