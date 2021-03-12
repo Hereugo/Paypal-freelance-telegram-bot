@@ -341,7 +341,7 @@ messages = Map({
 		'text': 'Gig has been deleted'
 	},
 	'register': {
-		'text': "Name: {}\nPaypal: {} "+CURRENCY+"\n\nDescription: {}",
+		'text': "Name: {}\nPaypal: {}\n\nDescription: {}",
 		'buttons': [
 			[
 				{
