@@ -93,7 +93,7 @@ def webhook():
 
 def getFromArrDict(arr, name, val):
 	for x in arr:
-		x[name] == val:
+		if x[name] == val:
 			return x
 	return None
 
