@@ -212,7 +212,7 @@ def create_offer(message, value):
 		back(message)
 		return
 
-	gig = getFromArrDict(user['gigs'], 'token', value[0])
+	gig = getFromArrDict(seller['gigs'], 'token', value[0])
 
 	if value[1] == '0':
 		msgg = bot.send_message(userId, 'Set your time in days')
