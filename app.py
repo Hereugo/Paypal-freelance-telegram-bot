@@ -67,6 +67,7 @@ def execute():
 		order = getFromArrDict(seller['gigs'], 'token', offer['token'])
 		t = time.time()
 		order.update({
+			'status': 'open',
 			'buyer_id': uid2,
 			'seller_id': uid1,
 			'id': offer['id'],
