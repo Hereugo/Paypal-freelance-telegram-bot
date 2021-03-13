@@ -40,6 +40,8 @@ paypalrestsdk.configure({
 
 @app.route('/' + TOKEN, methods=['POST'])
 def getMessage():
+	bot.enable_save_next_step_handlers(delay=2)
+	bot.load_next_step_handlers()
 	bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
 	print('Good')
 	return "!", 200
