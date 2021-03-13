@@ -98,6 +98,9 @@ def getFromArrDict(arr, name, val):
 			return x
 	return None
 
+def formatTime(x):
+	return '{}:{}:{}:{}'.format(x.tm_mday, x.tm_hour, x.tm_min, x.tm_sec) 
+
 def toSeconds(x):
 	return x * 24 * 60 * 60
 
@@ -201,7 +204,7 @@ def process_search_order_step(message, token=""):
 	collection.update_one({'_id': userId}, {'$set': {'path': 'menu/profile_buyer/search_order?{}'.format(token)}})
 
 	keyboard = create_keyboard(messages.search_order.buttons, [ [[''], [token]], [[''], [user['_id']]], empty_key])
-	bot.send_message(userId, messages.search_order.text[1].format(gig['title'], gig['desc'], gig['price'], user['name']), reply_markup=keyboard)
+	bot.send_message(userId, messages.search_order.text[1].format(gig['title'], gig['desc'], gig['price'], user['username']), reply_markup=keyboard)
 
 
 def create_offer(message, value):
@@ -228,7 +231,7 @@ def create_offer(message, value):
 	print(seller, buyer)
 
 	keyboard = create_keyboard(messages.create_offer.buttons, [ [[''], [value[0], 0]], empty_key, empty_key])
-	bot.send_message(userId, messages.create_offer.text[1].format(gig['title'], gig['desc'], gig['price'], seller['name'], buyer['process_order']['duration']), reply_markup=keyboard)
+	bot.send_message(userId, messages.create_offer.text[1].format(gig['title'], gig['desc'], gig['price'], seller['username'], buyer['process_order']['duration']), reply_markup=keyboard)
 def process_create_offer_time_step(message):
 	text = message.text
 	userId = message.chat.id
@@ -322,7 +325,12 @@ def orders(message, value):
 			[[''], [orders[value[0]]['id']], {'show': '1' if value[1] == 'seller' and orders[value[0]]['status'] != 'complete' else '2'}], 
 			empty_key]
 	keyboard = create_keyboard(messages.orders.buttons, vals)
-	ctime = time.ctime(orders[value[0]]['end_date'] - time.time())
+
+	timeLeft = orders[value[0]]['end_date'] - time.time()
+	if timeLeft >= 0:
+		ctime = formatTime(timeLeft)
+	else:
+		ctime = "LATE"
 	bot.send_message(userId, messages.orders.text[1].format(orders[value[0]]['status'], orders[value[0]]['title'], orders[value[0]]['desc'], orders[value[0]]['price'], orders[value[0]]['duration'], ctime), reply_markup=keyboard)
 
 def deliver_order(message, value):
@@ -345,8 +353,6 @@ def deliver_order_complete(message, value):
 	
 	order = getFromArrDict(seller['seller_orders'], 'id', value[0])
 
-	collection.update_one({'seller_orders.id': value[0]}, {'$set': {'seller_orders.$.status': 'complete'}})
-	collection.update_one({'_id': userId, 'buyer_orders.id': value[0]}, {'$set': {'buyer_orders.$.status': 'complete'}})
 	buyer = collection.find_one({'_id': order['buyer_id']})
 
 	sender_batch_id = newId()
@@ -369,6 +375,9 @@ def deliver_order_complete(message, value):
 	    ]
 	})
 	if payout.create():
+		collection.update_one({'seller_orders.id': value[0]}, {'$set': {'seller_orders.$.status': 'complete'}})
+		collection.update_one({'_id': userId, 'buyer_orders.id': value[0]}, {'$set': {'buyer_orders.$.status': 'complete'}})
+		
 		bot.send_message(buyer['_id'], messages.deliver_order.text[2].buyer[0])
 		bot.send_message(seller['_id'], messages.deliver_order.text[3].seller[0])
 

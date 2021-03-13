@@ -55,7 +55,7 @@ messages = Map({
 	},
 	'search_order': {
 		'text': ["Please send a given token here",
-				 "{}\n\n{}\n\nPrice: {} "+CURRENCY+"\n\nUser: {}"],
+				 "{}\n\n{}\n\nPrice: {} "+CURRENCY+"\n\nUser: @{}"],
 		'buttons': [
 			[
 				{
@@ -79,7 +79,7 @@ messages = Map({
 	},
 	'create_offer': {
 		'text': ['Cant make an offer to yourself',
-				 '{}\n\n{}\n\nPrice: {} '+CURRENCY+'\n\nUser: {}\nDuration: {} days',
+				 '{}\n\n{}\n\nPrice: {} '+CURRENCY+'\n\nUser: @{}\nDuration: {} days',
 				 'Offer has been sent, wait for a seller to confirm',
 				 'New offer from @{}'],
 		'buttons': [
@@ -217,14 +217,14 @@ messages = Map({
 	'file_dispute': {
 		'text': {
 			'buyer': ['Send what problem did your have',
-					  'Dispute was send to the seller {}'],
-			'seller': ['{} buyer has disputed the order, responed to the buyer in 24 hours',
+					  'Dispute was send to the seller @{}'],
+			'seller': ['@{} buyer has disputed the order, responed to the buyer in 24 hours',
 					   ],
 		}
 	},
 	'deliver_order': {
-		'text': ['Order {} was completed by {}, mark it complete to finish the order', 
-				 'Wait for {} to mark your order complete or decline',
+		'text': ['Order {} was completed by @{}, mark it complete to finish the order', 
+				 'Wait for @{} to mark your order complete or decline',
 				 {
 				 	'buyer': ['Thank you for using our services!',
 				 			  'Something went wrong, please continue when seller has fixed his issue',
