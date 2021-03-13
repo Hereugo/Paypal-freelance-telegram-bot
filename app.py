@@ -40,10 +40,9 @@ paypalrestsdk.configure({
 
 @app.route('/' + TOKEN, methods=['POST'])
 def getMessage():
-	bot.enable_save_next_step_handlers(delay=2)
+	bot.enable_save_next_step_handlers(delay=3)
 	bot.load_next_step_handlers()
 	bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
-	print('Good')
 	return "!", 200
 
 @app.route('/payment/execute/')
@@ -54,38 +53,34 @@ def execute():
 	payment = paypalrestsdk.Payment.find(payment_id)
 	[desc, uid1, uid2, offer_id] = payment['transactions'][0]['description'].split('#')
 	print(desc, uid1, uid2)
+	uid1 = int(uid1)
+	uid2 = int(uid2)
 	if payment.execute({'payer_id': payer_id}):
 		print('Payment was successful')
-		msg = bot.send_message(int(uid2), messages.payment_execute.text.buyer[0])
+		msg = bot.send_message(uid2, messages.payment_execute.text.buyer[0])
 
-		bot.send_message(int(uid1), messages.payment_execute.text.seller[0])
+		bot.send_message(uid1, messages.payment_execute.text.seller[0])
 
-		offer = ""
-		seller = collection.find_one({'_id': int(uid1)})
-		for x in seller['offers']:
-			if x['id'] == offer_id:
-				offer = x
-				break
-		order = ""
-		for x in seller['gigs']:
-			if x['token'] == offer['token']:
-				order = x
-				break
 
-		order['buyer_id'] = int(uid2)
-		order['seller_id'] = int(uid1)
-		order['id'] = offer['id']
-		order['status'] = 'open'
-		order['duration'] = int(offer['duration'])
-		order['start_date'] = time.time()
-		order['end_date'] = order['start_date'] + toSeconds(order['duration'])
+		seller = collection.find_one({'_id': uid1})
+		offer = getFromArrDict(seller['offers'], 'id', offer_id)
+		order = getFromArrDict(seller['gigs'], 'token', offer['token'])
+		t = time.time()
+		order.update({
+			'buyer_id': uid2,
+			'seller_id': uid1,
+			'id': offer['id'],
+			'duration': int(offer['duration']),
+			'start_time': t,
+			'end_date': t + toSeconds(int(offer['duration']))
+		})
 
 		print(order)
-		collection.update_one({'_id': int(uid1)}, {'$push': {'seller_orders': order}, '$pull': {'offers': {'id': offer['id']}}})
-		collection.update_one({'_id': int(uid2)}, {'$push': {'buyer_orders': order}})
+		collection.update_one({'_id': uid1}, {'$push': {'seller_orders': order}, '$pull': {'offers': {'id': offer['id']}}})
+		collection.update_one({'_id': uid2}, {'$push': {'buyer_orders': order}})
 	else:
 		print(payment.error)
-		msg = bot.send_message(int(uid2), messages.payment_execute.text.buyer[0])
+		msg = bot.send_message(uid2, messages.payment_execute.text.buyer[0])
 	menu(msg)
 
 	return "Payment success!", 200
@@ -95,6 +90,12 @@ def webhook():
 	bot.remove_webhook()
 	bot.set_webhook(url=URL + TOKEN)
 	return '!', 200
+
+def getFromArrDict(arr, name, val):
+	for x in arr:
+		x[name] == val:
+			return x
+	return None
 
 def toSeconds(x):
 	return x * 24 * 60 * 60
@@ -194,11 +195,7 @@ def process_search_order_step(message, token=""):
 		msg = bot.send_message(userId, 'Invalid token', reply_markup=keyboard)
 		return
 
-	gig = ""
-	for x in user['gigs']:
-		if x['token'] == token:
-			gig = x
-			break
+	gig = getFromArrDict(user['gigs'], 'token', token)
 
 	collection.update_one({'_id': userId}, {'$set': {'path': 'menu/profile_buyer/search_order?{}'.format(token)}})
 
@@ -215,12 +212,7 @@ def create_offer(message, value):
 		back(message)
 		return
 
-	gig = ""
-	for x in seller['gigs']:
-		if x['token'] == value[0]:
-			gig = x
-			break
-	print(gig)
+	gig = getFromArrDict(user['gigs'], 'token', value[0])
 
 	if value[1] == '0':
 		msgg = bot.send_message(userId, 'Set your time in days')
@@ -334,10 +326,9 @@ def orders(message, value):
 
 def deliver_order(message, value):
 	seller = collection.find_one({'seller_orders.id': value[0]})
-	for x in seller['seller_orders']:
-		if x['id'] == value[0]:
-			order = x
-			break
+	
+	order = getFromArrDict(seller['seller_orders'], 'id', value[0])
+
 	buyer = collection.find_one({'_id': order['buyer_id']})
 	collection.update_one({'seller_orders.id': value[0]}, {'$set': {'seller_orders.$.status': 'pending'}})
 	collection.update_one({'buyer_orders.id': value[0]}, {'$set': {'buyer_orders.$.status': 'pending'}})
@@ -350,10 +341,8 @@ def deliver_order(message, value):
 def deliver_order_complete(message, value):
 	userId = message.chat.id
 	seller = collection.find_one({'seller_orders.id': value[0]})
-	for x in seller['seller_orders']:
-		if x['id'] == value[0]:
-			order = x
-			break
+	
+	order = getFromArrDict(seller['seller_orders'], 'id', value[0])
 
 	collection.update_one({'seller_orders.id': value[0]}, {'$set': {'seller_orders.$.status': 'complete'}})
 	collection.update_one({'_id': userId, 'buyer_orders.id': value[0]}, {'$set': {'buyer_orders.$.status': 'complete'}})
@@ -391,10 +380,7 @@ def deliver_order_complete(message, value):
 def deliver_order_decline(message, value):
 	userId = message.chat.id
 	seller = collection.find_one({'seller_orders.id': value[0]})
-	for x in seller['seller_orders']:
-		if x['id'] == value[0]:
-			order = x
-			break
+	order = getFromArrDict(seller['seller_orders'], 'id', value[0])
 	buyer = collection.find_one({'_id': order['buyer_id']})
 
 	bot.send_message(buyer['_id'], messages.deliver_order.text[2].buyer[2])
@@ -413,10 +399,7 @@ def file_dispute_complete(message):
 	[query, value] = calc(re.search(r'\w+(|\?[^\/]+)$', buyer['path'])[0])
 	print(query, value, buyer['path'], 'buyer')
 	seller = collection.find_one({'seller_orders.id': value[0]})
-	for x in seller['seller_orders']:
-		if x['id'] == value[0]:
-			order = x
-			break
+	order = getFromArrDict(seller['seller_orders'], 'id', value[0])
 
 	bot.send_message(seller['_id'], messages.file_dispute.text.seller[0].format(buyer['username']))
 	bot.send_message(seller['_id'], text)
@@ -446,12 +429,8 @@ def offers(message, value):
 	vals = [ [[''], [max(value[0] - 1, 0)]], [[''], [min(value[0] + 1, len(offers) - 1)]], [[''], [offers[value[0]]['id']]], [[''], [offers[value[0]]['id']]], empty_key]
 	keyboard = create_keyboard(messages.offers.buttons, vals)
 
-	gig = ""
 	token = offers[value[0]]['token']
-	for x in collection.find_one({'gigs.token': token})['gigs']:
-		if x['token'] == token:
-			gig = x
-			break
+	gig = getFromArrDict(collection.find_one({'gigs.token': token})['gigs'], 'id', token)
 
 	bot.send_message(userId, messages.offers.text[0].format(gig['title'], gig['desc'], gig['price'], offers[value[0]]['duration']), reply_markup=keyboard)
 
@@ -462,16 +441,8 @@ def accept_offer(message, value):
 	menu(message)
 
 	seller = collection.find_one({'_id': userId})
-	offer = ""
-	for x in seller['offers']:
-		if x['id'] == value[0]:
-			offer = x
-			break
-	gig = ""
-	for x in seller['gigs']:
-		if x['token'] == offer['token']:
-			gig = x
-			break
+	offer = getFromArrDict(seller['offers'], 'id', value[0])
+	gig = getFromArrDict(seller['gigs'], 'token', offer['token'])
 
 
 	payment = Payment({
@@ -521,11 +492,8 @@ def decline_offer(message, value):
 	back(message)
 
 	seller = collection.find_one({'_id': userId})
-	offer = ""
-	for x in seller['offers']:
-		if x['id'] == value[0]:
-			offer = x
-			break
+	offer = getFromArrDict(seller['offers'], 'id', value[0])
+
 
 	collection.update_one({'_id': userId}, {'$pull': {'offers': {'id': offer['id']}}})
 	bot.send_message(offer['customer'], messages.offers.text[6].format(seller['username']))
