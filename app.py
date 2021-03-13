@@ -99,7 +99,7 @@ def getFromArrDict(arr, name, val):
 	return None
 
 def formatTime(x):
-	return '{}:{}:{}:{}'.format(x.tm_mday, x.tm_hour, x.tm_min, x.tm_sec) 
+	return '{} days {} hours {} minutes {} seconds'.format(x.tm_mday, x.tm_hour, x.tm_min, x.tm_sec) 
 
 def toSeconds(x):
 	return x * 24 * 60 * 60
@@ -318,19 +318,24 @@ def orders(message, value):
 		return
 
 	value[0] = int(value[0])
+	order = orders[value[0]]
+
 	vals = [[[''], [max(value[0] - 1, 0), value[1]]], 
 			[[''], [min(value[0] + 1, len(orders) - 1), value[1]]], 
-			[[''], [orders[value[0]]['seller_id']], {'show': '1' if value[1] == 'buyer' else '2'}], 
-			[[''], [orders[value[0]]['id']], {'show': '1' if value[1] == 'buyer' and orders[value[0]]['status'] == 'pending' else '2'}], 
-			[[''], [orders[value[0]]['id']], {'show': '1' if value[1] == 'seller' and orders[value[0]]['status'] != 'complete' else '2'}], 
+			[[''], [order['seller_id']], {'show': '1' if value[1] == 'buyer' else '2'}], 
+			[[''], [order['id']], {'show': '1' if value[1] == 'buyer' and order['status'] == 'pending' else '2'}], 
+			[[''], [order['id']], {'show': '1' if value[1] == 'seller' and order['status'] != 'complete' else '2'}], 
 			empty_key]
 	keyboard = create_keyboard(messages.orders.buttons, vals)
 
-	timeLeft = orders[value[0]]['end_date'] - time.time()
-	if timeLeft >= 0:
-		ctime = formatTime(time.gmtime(timeLeft))
+	if order['status'] == 'complete':
+		ctime = 'FINSIHED'
 	else:
-		ctime = "LATE"
+		timeLeft = orders[value[0]]['end_date'] - time.time()
+		if timeLeft >= 0:
+			ctime = formatTime(time.gmtime(timeLeft))
+		else:
+			ctime = "LATE"
 	bot.send_message(userId, messages.orders.text[1].format(orders[value[0]]['status'], orders[value[0]]['title'], orders[value[0]]['desc'], orders[value[0]]['price'], orders[value[0]]['duration'], ctime), reply_markup=keyboard)
 
 def deliver_order(message, value):
