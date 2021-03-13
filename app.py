@@ -430,7 +430,7 @@ def offers(message, value):
 	keyboard = create_keyboard(messages.offers.buttons, vals)
 
 	token = offers[value[0]]['token']
-	gig = getFromArrDict(collection.find_one({'gigs.token': token})['gigs'], 'id', token)
+	gig = getFromArrDict(collection.find_one({'gigs.token': token})['gigs'], 'token', token)
 
 	bot.send_message(userId, messages.offers.text[0].format(gig['title'], gig['desc'], gig['price'], offers[value[0]]['duration']), reply_markup=keyboard)
 

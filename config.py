@@ -81,7 +81,7 @@ messages = Map({
 		'text': ['Cant make an offer to yourself',
 				 '{}\n\n{}\n\nPrice: {} '+CURRENCY+'\n\nUser: {}\nDuration: {} days',
 				 'Offer has been sent, wait for a seller to confirm',
-				 'New offer from {}'],
+				 'New offer from @{}'],
 		'buttons': [
 			[	
 				{
@@ -384,7 +384,7 @@ messages = Map({
 				 'Typin your name',
 				 'Typin your paypal account',
 				 'Typin your profile description',
-				 
+
 				 "Registration completed!"],
 		'buttons': [
 			[
