@@ -54,11 +54,9 @@ def execute():
 	print(desc, uid1, uid2)
 	if payment.execute({'payer_id': payer_id}):
 		print('Payment was successful')
-		msg = bot.send_message(int(uid2), 'Payment was successful\n Order has been started!')
+		msg = bot.send_message(int(uid2), messages.payment_execute.text.buyer[0])
 
-
-		bot.send_message(int(uid1), 'Order has been started!')
-
+		bot.send_message(int(uid1), messages.payment_execute.text.seller[0])
 
 		offer = ""
 		seller = collection.find_one({'_id': int(uid1)})
@@ -85,7 +83,7 @@ def execute():
 		collection.update_one({'_id': int(uid2)}, {'$push': {'buyer_orders': order}})
 	else:
 		print(payment.error)
-		msg = bot.send_message(int(uid2), 'Something went wrong, try again later')
+		msg = bot.send_message(int(uid2), messages.payment_execute.text.buyer[0])
 	menu(msg)
 
 	return "Payment success!", 200
@@ -178,7 +176,7 @@ def search_order(message, value=-1):
 	if value == -1:
 		keyboard = InlineKeyboardMarkup()
 		keyboard.add(InlineKeyboardButton('Back', callback_data='back'))
-		msg = bot.send_message(userId, "Please send a given token here", reply_markup=keyboard)
+		msg = bot.send_message(userId, messages.search_order.text[0], reply_markup=keyboard)
 		bot.register_next_step_handler(msg, process_search_order_step)
 	else:
 		process_search_order_step(message, value[0])
@@ -203,7 +201,7 @@ def process_search_order_step(message, token=""):
 	collection.update_one({'_id': userId}, {'$set': {'path': 'menu/profile_buyer/search_order?{}'.format(token)}})
 
 	keyboard = create_keyboard(messages.search_order.buttons, [ [[''], [token]], [[''], [user['_id']]], empty_key])
-	bot.send_message(userId, messages.search_order.text.format(gig['title'], gig['desc'], gig['price'], user['name']), reply_markup=keyboard)
+	bot.send_message(userId, messages.search_order.text[1].format(gig['title'], gig['desc'], gig['price'], user['name']), reply_markup=keyboard)
 
 
 def create_offer(message, value):
@@ -211,7 +209,7 @@ def create_offer(message, value):
 	seller = collection.find_one({'gigs.token': value[0]})
 
 	if seller['_id'] == userId:
-		bot.send_message(userId, 'Cant make an offer to yourself')
+		bot.send_message(userId, messages.create_offer.text[0])
 		back(message)
 		return
 
@@ -235,7 +233,7 @@ def create_offer(message, value):
 	print(seller, buyer)
 
 	keyboard = create_keyboard(messages.create_offer.buttons, [ [[''], [value[0], 0]], empty_key, empty_key])
-	bot.send_message(userId, messages.create_offer.text.format(gig['title'], gig['desc'], gig['price'], seller['name'], buyer['process_order']['duration']), reply_markup=keyboard)
+	bot.send_message(userId, messages.create_offer.text[1].format(gig['title'], gig['desc'], gig['price'], seller['name'], buyer['process_order']['duration']), reply_markup=keyboard)
 def process_create_offer_time_step(message):
 	text = message.text
 	userId = message.chat.id
@@ -251,7 +249,7 @@ def process_create_offer_time_step(message):
 def create_offer_complete(message):
 	userId = message.chat.id
 
-	bot.send_message(userId, messages.create_offer_complete.text[0])
+	bot.send_message(userId, messages.create_offer.text[2])
 
 	buyer = collection.find_one({'_id': userId})
 	offer = buyer['process_order']
@@ -261,7 +259,7 @@ def create_offer_complete(message):
 	collection.update_one({'_id': seller['_id']}, {'$push': {'offers': offer}}) # Send offer to seller
 	collection.update_one({'_id': userId}, {'$set': {'process_order': {'id': str(newId()), 'duration': "", 'token': '#'}}}) # Clear process order of buyer
 
-	bot.send_message(seller['_id'], messages.create_offer_complete.text[1].format(buyer['username']))
+	bot.send_message(seller['_id'], messages.create_offer.text[3].format(buyer['username']))
 
 def see_profile(message, value):
 	userId = message.chat.id
@@ -292,11 +290,11 @@ def gigs(message, value):
 	try:	
 		gigs = collection.find_one({'_id': userId})['gigs']
 		if len(gigs) == 0:
-			bot.send_message(userId, 'No gigs were made')
+			bot.send_message(userId, messages.gigs.text[0])
 			back(message)
 			return
 	except:
-		bot.send_message(userId, 'No gigs were made')
+		bot.send_message(userId, messages.gigs.text[0])
 		back(message)
 		return
 
@@ -306,18 +304,18 @@ def gigs(message, value):
 
 	vals = [[[''], [max(value[0] - 1, 0), value[1]]], [[''], [min(value[0] + 1, len(gigs) - 1), value[1]]], [[''], [value[0]], {'show': value[1]}], [[''], [value[0]]], empty_key]
 	keyboard = create_keyboard(messages.gigs.buttons, vals)
-	bot.send_message(userId, messages.gigs.text.format(gigs[value[0]]['title'], gigs[value[0]]['desc'], gigs[value[0]]['price']), reply_markup=keyboard)
+	bot.send_message(userId, messages.gigs.text[1].format(gigs[value[0]]['title'], gigs[value[0]]['desc'], gigs[value[0]]['price']), reply_markup=keyboard)
 
 def orders(message, value):
 	userId = message.chat.id
 	try:	
 		orders = collection.find_one({'_id': userId})['{}_orders'.format(value[1])]
 		if len(orders) == 0:
-			bot.send_message(userId, 'No current orders')
+			bot.send_message(userId, messages.orders.text[0])
 			back(message)
 			return
 	except:
-		bot.send_message(userId, 'No current orders')
+		bot.send_message(userId, messages.orders.text[0])
 		back(message)
 		return
 
@@ -330,7 +328,7 @@ def orders(message, value):
 			empty_key]
 	keyboard = create_keyboard(messages.orders.buttons, vals)
 	ctime = time.ctime(orders[value[0]]['end_date'] - time.time())
-	bot.send_message(userId, messages.orders.text.format(orders[value[0]]['status'], orders[value[0]]['title'], orders[value[0]]['desc'], orders[value[0]]['price'], orders[value[0]]['duration'], ctime), reply_markup=keyboard)
+	bot.send_message(userId, messages.orders.text[1].format(orders[value[0]]['status'], orders[value[0]]['title'], orders[value[0]]['desc'], orders[value[0]]['price'], orders[value[0]]['duration'], ctime), reply_markup=keyboard)
 
 def deliver_order(message, value):
 	seller = collection.find_one({'seller_orders.id': value[0]})
@@ -379,13 +377,13 @@ def deliver_order_complete(message, value):
 	    ]
 	})
 	if payout.create():
-		bot.send_message(buyer['_id'], 'Thank you for using our services!')
-		bot.send_message(seller['_id'], 'Order was completed, payment was done through your paypal')
+		bot.send_message(buyer['_id'], messages.deliver_order.text[2].buyer[0])
+		bot.send_message(seller['_id'], messages.deliver_order.text[3].seller[0])
 
 		print("payout[%s] created successfully" % (payout.batch_header.payout_batch_id))
 	else:
-		bot.send_message(seller['_id'], 'Something went wrong, please check if your paypal account correctly written')
-		bot.send_message(buyer['_id'], 'Something went wrong, please continue when seller has fixed his issue')
+		bot.send_message(buyer['_id'], messages.deliver_order.text[2].buyer[1])
+		bot.send_message(seller['_id'], messages.deliver_order.text[3].seller[1])
 		print(payout.error)
 
 def deliver_order_decline(message, value):
@@ -397,12 +395,12 @@ def deliver_order_decline(message, value):
 			break
 	buyer = collection.find_one({'_id': order['buyer_id']})
 
-	bot.send_message(seller['_id'], 'Your delivery was declined')
-	bot.send_message(buyer['_id'], 'Delivery declined')
+	bot.send_message(buyer['_id'], messages.deliver_order.text[2].buyer[2])
+	bot.send_message(seller['_id'], messages.deliver_order.text[3].seller[2])
 
 def file_dispute(message, value):
 	userId = message.chat.id
-	msg = bot.send_message(userId, 'Send what problem did your have')
+	msg = bot.send_message(userId, messages.file_dispute.text.buyer[0])
 	bot.register_next_step_handler(msg, file_dispute_complete)
 
 def file_dispute_complete(message):
@@ -418,9 +416,9 @@ def file_dispute_complete(message):
 			order = x
 			break
 
-	bot.send_message(seller['_id'], '{} buyer has disputed the order, responed to the buyer in 24 hours'.format(buyer['username']))
+	bot.send_message(seller['_id'], messages.file_dispute.text.seller[0].format(buyer['username']))
 	bot.send_message(seller['_id'], text)
-	bot.send_message(userId, 'Dispute was send to the seller {}'.format(seller['username']))
+	bot.send_message(userId, messages.file_dispute.text.buyer[1].format(seller['username']))
 
 	collection.update_one({'seller_orders.id': value[0]}, {'$set': {'seller_orders.$.status': 'on hold'}})
 	collection.update_one({'_id': userId, 'buyer_orders.id': value[0]}, {'$set': {'buyer_orders.$.status': 'on hold'}})
@@ -432,11 +430,11 @@ def offers(message, value):
 	try:	
 		offers = collection.find_one({'_id': userId})['offers']
 		if len(offers) == 0:
-			bot.send_message(userId, 'No offers were found')
+			bot.send_message(userId, messages.offers.text[1])
 			back(message)
 			return
 	except:
-		bot.send_message(userId, 'No offers were found')
+		bot.send_message(userId, messages.offers.text[1])
 		back(message)
 		return
 	value[0] = int(value[0])
@@ -453,12 +451,12 @@ def offers(message, value):
 			gig = x
 			break
 
-	bot.send_message(userId, messages.offers.text.format(gig['title'], gig['desc'], gig['price'], offers[value[0]]['duration']), reply_markup=keyboard)
+	bot.send_message(userId, messages.offers.text[0].format(gig['title'], gig['desc'], gig['price'], offers[value[0]]['duration']), reply_markup=keyboard)
 
 def accept_offer(message, value):
 	userId = message.chat.id
 
-	bot.send_message(userId, 'Wait for an order to start')
+	bot.send_message(userId, messages.offers.text[2])
 	menu(message)
 
 	seller = collection.find_one({'_id': userId})
@@ -510,14 +508,14 @@ def accept_offer(message, value):
 			if link.rel == "approval_url":
 				approval_url = str(link.href)
 				print("Redirect for approval: %s" % (approval_url))
-				bot.send_message(offer['customer'], 'Offer {} was accepted\n To begin this order pay using this link {}'.format(offer['id'], approval_url))
+				bot.send_message(offer['customer'], messages.offers.text[3].format(offer['id'], approval_url))
 	else:
-		bot.send_message(userId, 'Something went wrong')
+		bot.send_message(userId, messages.offers.text[4])
 
 def decline_offer(message, value):
 	userId = message.chat.id
 
-	bot.send_message(userId, 'Offer was declined')
+	bot.send_message(userId, messages.offers.text[5])
 	back(message)
 
 	seller = collection.find_one({'_id': userId})
@@ -528,7 +526,7 @@ def decline_offer(message, value):
 			break
 
 	collection.update_one({'_id': userId}, {'$pull': {'offers': {'id': offer['id']}}})
-	bot.send_message(offer['customer'], '{} has declined your offer'.format(seller['username']))
+	bot.send_message(offer['customer'], messages.offers.text[6].format(seller['username']))
 
 def token_reciever(message, value):
 	userId = message.chat.id
@@ -552,15 +550,15 @@ def create_new_gig(message, value):
 	path = user['path']
 
 	if value[0] == '0': # Title
-		msgg = bot.send_message(userId, 'Typin your Title')
+		msgg = bot.send_message(userId, messages.create_new_gig.text[1])
 		bot.register_next_step_handler(msgg, process_create_new_gig_step)
 		return
 	elif value[0] == '1': # Description
-		msgg = bot.send_message(userId, 'Typin your gigs description')
+		msgg = bot.send_message(userId, messages.create_new_gig.text[2])
 		bot.register_next_step_handler(msgg, process_create_new_gig_step)
 		return
 	elif value[0] == '2': # Price
-		msgg = bot.send_message(userId, 'Set your price')
+		msgg = bot.send_message(userId, messages.create_new_gig.text[3])
 		bot.register_next_step_handler(msgg, process_create_new_gig_step)
 		return
 
@@ -570,7 +568,7 @@ def create_new_gig(message, value):
 
 	vals = [empty_key, empty_key, empty_key, empty_key, [[''], [gig['token']], {'show': '1' if gig['token'] != '#' else '#'}], empty_key]
 	keyboard = create_keyboard(messages.create_new_gig.buttons, vals)
-	bot.send_message(userId, messages.create_new_gig.text.format(gig['title'], gig['desc'], gig['price']), reply_markup=keyboard)
+	bot.send_message(userId, messages.create_new_gig.text[0].format(gig['title'], gig['desc'], gig['price']), reply_markup=keyboard)
 
 def delete_gig(message, value):
 	userId = message.chat.id
@@ -620,15 +618,15 @@ def register(message, value):
 	path = user['path']
 
 	if value[0] == '0': # Name
-		msgg = bot.send_message(userId, 'Typin your name')
+		msgg = bot.send_message(userId, messages.register.text[1])
 		bot.register_next_step_handler(msgg, process_register_step)
 		return
 	elif value[0] == '1': # Paypal account
-		msgg = bot.send_message(userId, 'Typin your paypal account')
+		msgg = bot.send_message(userId, messages.register.text[2])
 		bot.register_next_step_handler(msgg, process_register_step)
 		return
 	elif value[0] == '2': # Profile Description
-		msgg = bot.send_message(userId, 'Typin your profile description')
+		msgg = bot.send_message(userId, messages.register.text[3])
 		bot.register_next_step_handler(msgg, process_register_step)
 		return
 
@@ -637,7 +635,7 @@ def register(message, value):
 	keyboard = create_keyboard(messages.register.buttons, [empty_key, empty_key, empty_key, empty_key, empty_key])
 
 	user = collection.find_one({'_id': userId})
-	bot.send_message(userId, messages.register.text.format(user['name'], user['paypal_account'], user['profile_desc']), reply_markup=keyboard)
+	bot.send_message(userId, messages.register.text[0].format(user['name'], user['paypal_account'], user['profile_desc']), reply_markup=keyboard)
 
 def process_register_step(message):
 	text = message.text
@@ -672,7 +670,7 @@ def register_complete(message):
 	}
 	collection.update_one({'_id': userId}, {'$set': val}) # set profile description
 
-	bot.send_message(userId, "Registration completed!")
+	bot.send_message(userId, messages.register.text[4])
 
 	menu(message)
 ############################

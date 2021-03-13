@@ -10,6 +10,13 @@ CURRENCY = "USD"
 # PATH SYSTEM
 
 messages = Map({
+	'payment_execute': {
+		'text': {
+			'buyer': ['Payment was successful\n Order has been started!',
+					  'Something went wrong, try again later'],
+			'seller': ['Order has been started!'],
+		} 		 
+	},
 	'menu': {
 		'text': "Welcome!",
 		'buttons': [
@@ -47,7 +54,8 @@ messages = Map({
 		],
 	},
 	'search_order': {
-		'text': "{}\n\n{}\n\nPrice: {} "+CURRENCY+"\n\nUser: {}",
+		'text': ["Please send a given token here",
+				 "{}\n\n{}\n\nPrice: {} "+CURRENCY+"\n\nUser: {}"],
 		'buttons': [
 			[
 				{
@@ -70,7 +78,10 @@ messages = Map({
 		],
 	},
 	'create_offer': {
-		'text': '{}\n\n{}\n\nPrice: {} '+CURRENCY+'\n\nUser: {}\nDuration: {} days',
+		'text': ['Cant make an offer to yourself',
+				 '{}\n\n{}\n\nPrice: {} '+CURRENCY+'\n\nUser: {}\nDuration: {} days',
+				 'Offer has been sent, wait for a seller to confirm',
+				 'New offer from {}'],
 		'buttons': [
 			[	
 				{
@@ -91,9 +102,6 @@ messages = Map({
 				}
 			]
 		],
-	},
-	'create_offer_complete': {
-		'text': ['Offer has been sent, wait for a seller to confirm', 'New offer from {}'],
 	},
 	'see_profile': {
 		'text': 'Name: {}\n\n{}',
@@ -167,7 +175,8 @@ messages = Map({
 		],
 	},
 	'orders': {
-		'text': 'Project status: {}\n\nTitle: {}\n {}\n\n Price: {} '+CURRENCY+'\n Duration: {} days\n Time left: {}',
+		'text': ['No current orders',
+				 'Project status: {}\n\nTitle: {}\n {}\n\n Price: {} '+CURRENCY+'\n Duration: {} days\n Time left: {}'],
 		'buttons': [
 			[
 				{
@@ -205,8 +214,27 @@ messages = Map({
 			]
 		],
 	},
+	'file_dispute': {
+		'text': {
+			'buyer': ['Send what problem did your have',
+					  'Dispute was send to the seller {}'],
+			'seller': ['{} buyer has disputed the order, responed to the buyer in 24 hours',
+					   ],
+		}
+	},
 	'deliver_order': {
-		'text': ['Order {} was completed by {}, mark it complete to finish the order', 'Wait for {} to mark your order complete or decline'],
+		'text': ['Order {} was completed by {}, mark it complete to finish the order', 
+				 'Wait for {} to mark your order complete or decline',
+				 {
+				 	'buyer': ['Thank you for using our services!',
+				 			  'Something went wrong, please continue when seller has fixed his issue',
+				 			  'Delivery declined']
+				 },
+				 {
+				 	'seller': ['Order was completed, payment was done through your paypal',
+				 			   'Something went wrong, please check if your paypal account correctly written',
+				 			   'Your delivery was declined']
+				 }],
 		'buttons': [
 			[
 				{
@@ -223,7 +251,14 @@ messages = Map({
 		]
 	},
 	'offers': {
-		'text': 'Title: {}\n {}\n\n Price: {} '+CURRENCY+'\n Duration: {} days',
+		'text': ['Title: {}\n {}\n\n Price: {} '+CURRENCY+'\n Duration: {} days',
+				 'No offers were found',
+				 'Wait for an order to start',
+				 'Offer {} was accepted\n To begin this order pay using this link {}',
+				 'Something went wrong',
+
+				 'Offer was declined',
+				 '{} has declined your offer'],
 		'buttons': [
 			[
 				{
@@ -254,7 +289,8 @@ messages = Map({
 		],
 	},
 	'gigs': {
-		'text': 'Title: {}\n\nDescription: {}\n\n Price: {} '+CURRENCY,
+		'text': ['No gigs were made',
+				 'Title: {}\n\nDescription: {}\n\n Price: {} '+CURRENCY],
 		'buttons': [
 			[
 				{
@@ -299,7 +335,10 @@ messages = Map({
 		],
 	},
 	'create_new_gig': {
-		'text': 'Title:{}\n\nDescription:{}\n\n Price:{} '+CURRENCY,
+		'text': ['Title:{}\n\nDescription:{}\n\n Price:{} '+CURRENCY,
+				 'Typin your Title',
+				 'Typin your gigs description',
+				 'Set your price'],
 		'buttons': [
 			[
 				{
@@ -341,7 +380,12 @@ messages = Map({
 		'text': 'Gig has been deleted'
 	},
 	'register': {
-		'text': "Name: {}\nPaypal: {}\n\nDescription: {}",
+		'text': ["Name: {}\nPaypal: {}\n\nDescription: {}",
+				 'Typin your name',
+				 'Typin your paypal account',
+				 'Typin your profile description',
+				 
+				 "Registration completed!"],
 		'buttons': [
 			[
 				{
