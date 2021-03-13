@@ -328,7 +328,7 @@ def orders(message, value):
 
 	timeLeft = orders[value[0]]['end_date'] - time.time()
 	if timeLeft >= 0:
-		ctime = formatTime(timeLeft)
+		ctime = formatTime(time.gmtime(timeLeft))
 	else:
 		ctime = "LATE"
 	bot.send_message(userId, messages.orders.text[1].format(orders[value[0]]['status'], orders[value[0]]['title'], orders[value[0]]['desc'], orders[value[0]]['price'], orders[value[0]]['duration'], ctime), reply_markup=keyboard)
