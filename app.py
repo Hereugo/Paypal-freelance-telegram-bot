@@ -114,9 +114,7 @@ def checkRegistration(message, user):
 	userId = message.chat.id
 	print(user['registered'])
 	if not user['registered']:
-		print("hello?")
-		path = previous(user['path']) + '/register'
-		collection.update_one({'_id': userId}, {'$set': {'path': path}})
+		collection.update_one({'_id': userId}, {'$set': {'path': 'menu/register'}})
 		register(message)
 		return True
 	return False
@@ -597,6 +595,7 @@ def create_new_gig_complete(message):
 ## REGISTERATION SYSTEM ##
 
 def register(message):
+	print("ASD:JLAKSDJ")
 	userId = message.chat.id
 	bot.send_message(userId, messages.register.text[0])
 	msg = bot.send_message(userId, messages.register.text[1])
