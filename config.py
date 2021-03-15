@@ -1,5 +1,3 @@
-from functions import Map
-
 TOKEN = "1272925344:AAFO3V-DSpEcMYkfL8oMZ38Ei7JlAFIXr-o"
 URI = 'mongodb+srv://Amir:2LSCfSNcwAz9x3!@cluster0.jxsw1.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
 URL = 'https://paypal-telegram-fiverr-bot.herokuapp.com/'
@@ -60,7 +58,7 @@ messages = Map({
 			[
 				{
 					'text': 'Create an offer',
-					'callback_data': 'create_offer?{},9',
+					'callback_data': 'create_offer',
 				}
 			],
 			[
@@ -79,16 +77,10 @@ messages = Map({
 	},
 	'create_offer': {
 		'text': ['Cant make an offer to yourself',
-				 '{}\n\n{}\n\nPrice: {} '+CURRENCY+'\n\nUser: @{}\nDuration: {} days',
-				 'Offer has been sent, wait for a seller to confirm',
+				 '{}\n\n{}\n\nPrice: {} '+CURRENCY+'\n\nUser: @{}\nDuration: 2 days',
+				 'Offer has been sent, wait for a seller @{} to confirm',
 				 'New offer from @{}'],
 		'buttons': [
-			[	
-				{
-					'text': 'Set time',
-					'callback_data': 'create_offer?{},{}',
-				},
-			],
 			[
 				{
 					'text': 'Send',
@@ -104,30 +96,7 @@ messages = Map({
 		],
 	},
 	'see_profile': {
-		'text': 'Name: {}\n\n{}',
-		'buttons': [
-			[
-				{
-					'text': 'Start a conversation',
-					'callback_data': 'start_conversation?{}',
-				},
-			],
-			[
-				{
-					'text': 'More Services',
-					'callback_data': 'gigs?0,0',
-				},
-			],
-			[
-				{
-					'text': 'Back',
-					'callback_data': 'back',
-				}
-			]
-		],
-	},
-	'start_conversation': {
-		'text': '@{}',
+		'text': 'PROFILE OF @{}\n\nName: {}\nPaypal: {}',
 		'buttons': [
 			[
 				{
@@ -172,7 +141,7 @@ messages = Map({
 	},
 	'orders': {
 		'text': ['No current orders',
-				 'Project status: {}\n\nTitle: {}\n {}\n\n Price: {} '+CURRENCY+'\n Duration: {} days\n Time left: {}'],
+				 'Project status: {}\n\nTitle: {}\n {}\n\n Price: {} '+CURRENCY+'\n Time left: {}'],
 		'buttons': [
 			[
 				{
