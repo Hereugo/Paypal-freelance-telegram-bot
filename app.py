@@ -274,7 +274,7 @@ def start_conversation(message, value):
 ####### SELLERS SYSTEM ########
 def profile_seller(message):
 	userId = message.chat.id
-	keyboard = create_keyboard(messages.profile_seller.buttons, [empty_key, empty_key, empty_key, empty_key, empty_key, empty_key])
+	keyboard = create_keyboard(messages.profile_seller.buttons, [empty_key, empty_key, empty_key, empty_key, empty_key])
 	bot.send_message(userId, messages.profile_seller.text.format(user['name'], user['paypal_account']), reply_markup=keyboard)
 
 # def gigs(message, value):
