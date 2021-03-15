@@ -153,7 +153,7 @@ messages = Map({
 			[
 				{
 					'text': 'Create new gig',
-					'callback_data': 'create_new_gig?9',
+					'callback_data': 'create_new_gig',
 				}
 			],
 			[
