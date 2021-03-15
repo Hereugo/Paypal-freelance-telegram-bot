@@ -172,6 +172,7 @@ def back(message):
 
 def profile_buyer(message):
 	userId = message.chat.id
+	user = collection.find_one({'_id': userId})
 	keyboard = create_keyboard(messages.profile_buyer.buttons, [empty_key, empty_key, empty_key])
 	bot.send_message(userId, messages.profile_buyer.text.format(user['name'], user['paypal_account']), reply_markup=keyboard)
 
