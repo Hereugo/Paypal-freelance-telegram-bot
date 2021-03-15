@@ -112,7 +112,6 @@ def previous(path):
 
 def checkRegistration(message, user):
 	userId = message.chat.id
-	print(user['registered'])
 	if not user['registered']:
 		collection.update_one({'_id': userId}, {'$set': {'path': 'menu/register'}})
 		register(message)
@@ -161,9 +160,7 @@ def menu(message):
 	collection.update_one({'_id': userId}, {'$set': {'path': 'menu'}})
 	user = collection.find_one({'_id': userId})
 
-	print(user, message)
 	if checkRegistration(message, user):
-		print("What")
 		return
 
 	keyboard = create_keyboard(messages.menu.buttons, [empty_key, empty_key])
@@ -278,28 +275,28 @@ def start_conversation(message, value):
 def profile_seller(message):
 	userId = message.chat.id
 	keyboard = create_keyboard(messages.profile_seller.buttons, [empty_key, empty_key, empty_key, empty_key, empty_key, empty_key])
-	bot.send_message(userId, messages.profile_seller.text.format(user['name'], user['paypal_account'], user['profile_desc']), reply_markup=keyboard)
+	bot.send_message(userId, messages.profile_seller.text.format(user['name'], user['paypal_account']), reply_markup=keyboard)
 
-def gigs(message, value):
-	userId = message.chat.id
-	try:	
-		gigs = collection.find_one({'_id': userId})['gigs']
-		if len(gigs) == 0:
-			bot.send_message(userId, messages.gigs.text[0])
-			back(message)
-			return
-	except:
-		bot.send_message(userId, messages.gigs.text[0])
-		back(message)
-		return
+# def gigs(message, value):
+# 	userId = message.chat.id
+# 	try:	
+# 		gigs = collection.find_one({'_id': userId})['gigs']
+# 		if len(gigs) == 0:
+# 			bot.send_message(userId, messages.gigs.text[0])
+# 			back(message)
+# 			return
+# 	except:
+# 		bot.send_message(userId, messages.gigs.text[0])
+# 		back(message)
+# 		return
 
-	value[0] = int(value[0])
+# 	value[0] = int(value[0])
 
-	keyboard = InlineKeyboardMarkup()
+# 	keyboard = InlineKeyboardMarkup()
 
-	vals = [[[''], [max(value[0] - 1, 0), value[1]]], [[''], [min(value[0] + 1, len(gigs) - 1), value[1]]], [[''], [value[0]], {'show': value[1]}], [[''], [value[0]]], empty_key]
-	keyboard = create_keyboard(messages.gigs.buttons, vals)
-	bot.send_message(userId, messages.gigs.text[1].format(gigs[value[0]]['title'], gigs[value[0]]['desc'], gigs[value[0]]['price']), reply_markup=keyboard)
+# 	vals = [[[''], [max(value[0] - 1, 0), value[1]]], [[''], [min(value[0] + 1, len(gigs) - 1), value[1]]], [[''], [value[0]], {'show': value[1]}], [[''], [value[0]]], empty_key]
+# 	keyboard = create_keyboard(messages.gigs.buttons, vals)
+# 	bot.send_message(userId, messages.gigs.text[1].format(gigs[value[0]]['title'], gigs[value[0]]['desc'], gigs[value[0]]['price']), reply_markup=keyboard)
 
 def orders(message, value):
 	userId = message.chat.id
@@ -510,71 +507,51 @@ def decline_offer(message, value):
 	collection.update_one({'_id': userId}, {'$pull': {'offers': {'id': offer['id']}}})
 	bot.send_message(offer['customer'], messages.offers.text[6].format(seller['username']))
 
-def token_reciever(message, value):
-	userId = message.chat.id
-	value = int(value[0])
-	gig = collection.find_one({'_id': userId})['gigs'][value]
+# def token_reciever(message, value):
+# 	userId = message.chat.id
+# 	value = int(value[0])
+# 	gig = collection.find_one({'_id': userId})['gigs'][value]
 
-	keyboard = create_keyboard(messages.token_reciever.buttons, [empty_key])
-	bot.send_message(userId, messages.token_reciever.text.format(gig['token']), reply_markup=keyboard)
+# 	keyboard = create_keyboard(messages.token_reciever.buttons, [empty_key])
+# 	bot.send_message(userId, messages.token_reciever.text.format(gig['token']), reply_markup=keyboard)
 
-def edit_gig(message, value):
-	userId = message.chat.id
-	gig = collection.find_one({'_id': userId})['gigs'][int(value[1])]
-	collection.update_one({'_id': userId}, {'$set': {'process_gig': gig}})
-	create_new_gig(message, value)
+# def edit_gig(message, value):
+# 	userId = message.chat.id
+# 	gig = collection.find_one({'_id': userId})['gigs'][int(value[1])]
+# 	collection.update_one({'_id': userId}, {'$set': {'process_gig': gig}})
+# 	create_new_gig(message, value)
 ###############################
 
 ## CREATE NEW GIG SYSTEM ##
-def create_new_gig(message, value):
+def create_new_gig(message):
 	userId = message.chat.id
-	user = collection.find_one({'_id': userId})
-	path = user['path']
-
-	if value[0] == '0': # Title
-		msgg = bot.send_message(userId, messages.create_new_gig.text[1])
-		bot.register_next_step_handler(msgg, process_create_new_gig_step)
+	bot.send_message(userId, messages.create_new_gig.text[0])
+	msg = bot.send_message(userId, messages.create_new_gig.text[1])
+	bot.register_next_step_handler(msg, process_create_new_gig_step_title)
+def process_create_new_gig_step_title(message):
+	userId = message.chat.id
+	collection.update_one({'_id': userId}, {'$set': {'process_gig.title': message.text}})
+	msg = bot.send_message(userId, messages.create_new_gig.text[2])
+	bot.register_next_step_handler(msg, process_create_new_gig_step_desc)
+def process_create_new_gig_step_desc(message):
+	userId = message.chat.id
+	collection.update_one({'_id': userId}, {'$set': {'process_gig.desc': message.text}})
+	msg = bot.send_message(userId, messages.create_new_gig.text[3])
+	bot.register_next_step_handler(msg, process_create_new_gig_step_price)
+def process_create_new_gig_step_price(message):
+	try:
+		price = int(message.text)
+	except:
+		msg = bot.send_message(userId, messages.create_new_gig.text[6])
+		bot.register_next_step_handler(msg, process_create_new_gig_step_price)
 		return
-	elif value[0] == '1': # Description
-		msgg = bot.send_message(userId, messages.create_new_gig.text[2])
-		bot.register_next_step_handler(msgg, process_create_new_gig_step)
-		return
-	elif value[0] == '2': # Price
-		msgg = bot.send_message(userId, messages.create_new_gig.text[3])
-		bot.register_next_step_handler(msgg, process_create_new_gig_step)
-		return
-
-	collection.update_one({'_id': userId}, {'$set': {'path': previous(path)}})
+	collection.update_one({'_id': userId}, {'$set': {'process_gig.price': message.text}})
 
 	gig = collection.find_one({'_id': userId})['process_gig']
+	bot.send_message(userId, messages.create_new_gig.text[4].format(gig['title'], gig['desc'], gig['price']))
 
-	vals = [empty_key, empty_key, empty_key, empty_key, [[''], [gig['token']], {'show': '1' if gig['token'] != '#' else '#'}], empty_key]
-	keyboard = create_keyboard(messages.create_new_gig.buttons, vals)
-	bot.send_message(userId, messages.create_new_gig.text[0].format(gig['title'], gig['desc'], gig['price']), reply_markup=keyboard)
-
-def delete_gig(message, value):
-	userId = message.chat.id
-	collection.update_one({'_id': userId}, {'$pull': {'gigs': {'token': value[0]}}})
-
-	bot.send_message(userId, messages.delete_gig.text)
-	menu(message)
-
-def process_create_new_gig_step(message):
-	text = message.text
-	userId = message.chat.id
-
-	user = collection.find_one({'_id': userId})
-	[query, value] = calc(re.search(r'\w+(|\?[^\/]+)$', user['path'])[0])
-	print(query, value, user['path'])
-	if value[0] == '0': # Title
-		collection.update_one({'_id': userId}, {'$set': {'process_gig.title': text}})
-	elif value[0] == '1': # Description
-		collection.update_one({'_id': userId}, {'$set': {'process_gig.desc': text}})
-	elif value[0] == '2': # Price
-		collection.update_one({'_id': userId}, {'$set': {'process_gig.price': text}})
-
-	create_new_gig(message, ['9'])
-
+	keyboard = create_keyboard(messages.create_new_gig.buttons, [empty_key, empty_key])
+	bot.send_message(userId, messages.create_new_gig.text[5], reply_markup=keyboard)
 def create_new_gig_complete(message):
 	userId = message.chat.id
 
@@ -584,18 +561,82 @@ def create_new_gig_complete(message):
 	else:
 		gig['token'] = newId()
 		collection.update_one({'_id': userId}, {'$push': {'gigs': gig}})
-
-	collection.update_one({'_id': userId}, {'$set': {'process_gig':{'title':"", 'desc':"", 'price':"", 'token':"#"}}}) # clear process_gig
-
-	msg = bot.send_message(userId, 'Gig has been saved!')
-	collection.update_one({'_id': userId}, {'$set': {'path': 'menu/profile_seller'}})
+	# clear process_gig and change path
+	collection.update_one({'_id': userId}, {'$set': {'process_gig':{'title':"", 'desc':"", 'price':"", 'token':"#"}, 'path': 'menu/profile_seller'}})
+	bot.send_message(userId, messages.create_new_gig.text[7].format(gig['token']))
+	msg = bot.send_message(userId, messages.create_new_gig.text[8])
 	profile_seller(msg)
+
+
+# def create_new_gig(message, value):
+# 	userId = message.chat.id
+# 	user = collection.find_one({'_id': userId})
+# 	path = user['path']
+
+# 	if value[0] == '0': # Title
+# 		msgg = bot.send_message(userId, messages.create_new_gig.text[1])
+# 		bot.register_next_step_handler(msgg, process_create_new_gig_step)
+# 		return
+# 	elif value[0] == '1': # Description
+# 		msgg = bot.send_message(userId, messages.create_new_gig.text[2])
+# 		bot.register_next_step_handler(msgg, process_create_new_gig_step)
+# 		return
+# 	elif value[0] == '2': # Price
+# 		msgg = bot.send_message(userId, messages.create_new_gig.text[3])
+# 		bot.register_next_step_handler(msgg, process_create_new_gig_step)
+# 		return
+
+# 	collection.update_one({'_id': userId}, {'$set': {'path': previous(path)}})
+
+# 	gig = collection.find_one({'_id': userId})['process_gig']
+
+# 	vals = [empty_key, empty_key, empty_key, empty_key, [[''], [gig['token']], {'show': '1' if gig['token'] != '#' else '#'}], empty_key]
+# 	keyboard = create_keyboard(messages.create_new_gig.buttons, vals)
+# 	bot.send_message(userId, messages.create_new_gig.text[0].format(gig['title'], gig['desc'], gig['price']), reply_markup=keyboard)
+
+# def delete_gig(message, value):
+# 	userId = message.chat.id
+# 	collection.update_one({'_id': userId}, {'$pull': {'gigs': {'token': value[0]}}})
+
+# 	bot.send_message(userId, messages.delete_gig.text)
+# 	menu(message)
+
+# def process_create_new_gig_step(message):
+# 	text = message.text
+# 	userId = message.chat.id
+
+# 	user = collection.find_one({'_id': userId})
+# 	[query, value] = calc(re.search(r'\w+(|\?[^\/]+)$', user['path'])[0])
+# 	print(query, value, user['path'])
+# 	if value[0] == '0': # Title
+# 		collection.update_one({'_id': userId}, {'$set': {'process_gig.title': text}})
+# 	elif value[0] == '1': # Description
+# 		collection.update_one({'_id': userId}, {'$set': {'process_gig.desc': text}})
+# 	elif value[0] == '2': # Price
+# 		collection.update_one({'_id': userId}, {'$set': {'process_gig.price': text}})
+
+# 	create_new_gig(message, ['9'])
+
+# def create_new_gig_complete(message):
+# 	userId = message.chat.id
+
+# 	gig = collection.find_one({'_id': userId})['process_gig']
+# 	if gig['token'] != '#':
+# 		collection.update_one({'_id': userId, 'gigs.token': gig['token']}, {'$set': {'gigs.$.title': gig['title'], 'gigs.$.desc': gig['desc'], 'gigs.$.price': gig['price']}})
+# 	else:
+# 		gig['token'] = newId()
+# 		collection.update_one({'_id': userId}, {'$push': {'gigs': gig}})
+
+# 	collection.update_one({'_id': userId}, {'$set': {'process_gig':{'title':"", 'desc':"", 'price':"", 'token':"#"}}}) # clear process_gig
+
+# 	msg = bot.send_message(userId, 'Gig has been saved!')
+# 	collection.update_one({'_id': userId}, {'$set': {'path': 'menu/profile_seller'}})
+# 	profile_seller(msg)
 ############################
 
 ## REGISTERATION SYSTEM ##
 
 def register(message):
-	print("ASD:JLAKSDJ")
 	userId = message.chat.id
 	bot.send_message(userId, messages.register.text[0])
 	msg = bot.send_message(userId, messages.register.text[1])

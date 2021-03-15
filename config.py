@@ -33,7 +33,7 @@ messages = Map({
 		]
 	},
 	'profile_buyer': {
-		'text': "Name {}\nPaypal: {}\n",
+		'text': "PROFILE\n\nName {}\nPaypal: {}\n",
 		'buttons': [
 			[
 				{
@@ -138,7 +138,7 @@ messages = Map({
 		],
 	},
 	'profile_seller': {
-		'text': "Name: {}\nPaypal: {}\n\n{}",
+		'text': "PROFILE\n\nName: {}\nPaypal: {}",
 		'buttons': [
 			[
 				{
@@ -152,10 +152,6 @@ messages = Map({
 			],
 			[
 				{
-					'text': 'Gigs',
-					'callback_data': 'gigs?0,1',
-				},
-				{
 					'text': 'Create new gig',
 					'callback_data': 'create_new_gig?9',
 				}
@@ -163,7 +159,7 @@ messages = Map({
 			[
 				{
 					'text': 'Edit profile',
-					'callback_data': 'register?9'
+					'callback_data': 'register'
 				}
 			],
 			[
@@ -288,41 +284,41 @@ messages = Map({
 			]
 		],
 	},
-	'gigs': {
-		'text': ['No gigs were made',
-				 'Title: {}\n\nDescription: {}\n\n Price: {} '+CURRENCY],
-		'buttons': [
-			[
-				{
-					'text': '<',
-					'callback_data': 'gigs?{},{}',
-				},
-				{
-					'text': '>',
-					'callback_data': 'gigs?{},{}',
-				}
-			],
-			[
-				{
-					'show': True,
-					'text': 'Edit gig',
-					'callback_data': 'edit_gig?9,{}',
-				}
-			],
-			[
-				{
-					'text': 'Recieve token of this gig',
-					'callback_data': 'token_reciever?{}',
-				}
-			],
-			[
-				{
-					'text': 'Back',
-					'callback_data': 'back',
-				}
-			]
-		],
-	},
+	# 'gigs': {
+	# 	'text': ['No gigs were made',
+	# 			 'Title: {}\n\nDescription: {}\n\n Price: {} '+CURRENCY],
+	# 	'buttons': [
+	# 		[
+	# 			{
+	# 				'text': '<',
+	# 				'callback_data': 'gigs?{},{}',
+	# 			},
+	# 			{
+	# 				'text': '>',
+	# 				'callback_data': 'gigs?{},{}',
+	# 			}
+	# 		],
+	# 		[
+	# 			{
+	# 				'show': True,
+	# 				'text': 'Edit gig',
+	# 				'callback_data': 'edit_gig?9,{}',
+	# 			}
+	# 		],
+	# 		[
+	# 			{
+	# 				'text': 'Recieve token of this gig',
+	# 				'callback_data': 'token_reciever?{}',
+	# 			}
+	# 		],
+	# 		[
+	# 			{
+	# 				'text': 'Back',
+	# 				'callback_data': 'back',
+	# 			}
+	# 		]
+	# 	],
+	# },
 	'token_reciever': {
 		'text': '{}',
 		'buttons': [
@@ -335,43 +331,23 @@ messages = Map({
 		],
 	},
 	'create_new_gig': {
-		'text': ['Title:{}\n\nDescription:{}\n\n Price:{} '+CURRENCY,
-				 'Typin your Title',
-				 'Typin your gigs description',
-				 'Set your price'],
+		'text': ['Ok, lets create new gig',
+				 'Please type the gig title',
+				 'Please type the gig description',
+				 'Please type the price for this gig',
+				 'Ok, this is the info you type:\n\nTitle:{}\n\nDescription:{}\n\n Price:{} '+CURRENCY,
+				 'Your price need only contains numbers! like this: 14. Please type again...',
+				 'Ok all good, your token for this gig is: {}\nPlease give this token to the buyer. Please note that after the buyer accept your order you have 2 days to supply the gig.',
+				 'Gig has been saved!'],
 		'buttons': [
 			[
 				{
-					'text': 'Title',
-					'callback_data': 'create_new_gig?0',
+					'text': 'Yes',
+					'callback_data': 'create_new_gig_complete',
 				},
 				{
-					'text': 'Price',
-					'callback_data': 'create_new_gig?2',
-				}
-			],
-			[
-				{
-					'text': 'Description',
-					'callback_data': 'create_new_gig?1',
-				}
-			],
-			[
-				{
-					'text': 'Save',
-					'callback_data': 'create_new_gig_complete',
-				}
-			],
-			[
-				{
-					'text': 'Delete gig',
-					'callback_data': 'delete_gig?{}'
-				}
-			],
-			[
-				{
-					'text': 'Back',
-					'callback_data': 'back',
+					'text': 'No',
+					'callback_data': 'create_new_gig'
 				}
 			]
 		],
