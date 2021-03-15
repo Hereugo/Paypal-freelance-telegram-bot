@@ -548,6 +548,7 @@ def process_create_new_gig_step_desc(message):
 	msg = bot.send_message(userId, messages.create_new_gig.text[3])
 	bot.register_next_step_handler(msg, process_create_new_gig_step_price)
 def process_create_new_gig_step_price(message):
+	userId = message.chat.id
 	if not RepresentsInt(message.text):
 		msg = bot.send_message(userId, messages.create_new_gig.text[5])
 		bot.register_next_step_handler(msg, process_create_new_gig_step_price)
