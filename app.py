@@ -112,7 +112,9 @@ def previous(path):
 
 def checkRegistration(message, user):
 	userId = message.chat.id
+	print(user['registered'])
 	if not user['registered']:
+		print("hello?")
 		path = previous(user['path']) + '/register'
 		collection.update_one({'_id': userId}, {'$set': {'path': path}})
 		register(message)
@@ -603,7 +605,7 @@ def process_register_step_get_name(message):
 	userId = message.chat.id
 	collection.update_one({'_id': userId}, {'$set': {'name': message.text}})
 	msg = bot.send_message(userId, messages.register.text[2])
-	bot.register_next_step_handler(msg, register_complete)
+	bot.register_next_step_handler(msg, register_last_step)
 def register_last_step(message):
 	userId = message.chat.id
 	collection.update_one({'_id': userId}, {'$set': {'paypal_account': message.text}})
