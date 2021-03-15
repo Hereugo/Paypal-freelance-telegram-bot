@@ -380,39 +380,21 @@ messages = Map({
 		'text': 'Gig has been deleted'
 	},
 	'register': {
-		'text': ["Name: {}\nPaypal: {}\n\nDescription: {}",
+		'text': ['Register lets add some info about you',
 				 'Typin your name',
 				 'Typin your paypal account',
-				 'Typin your profile description',
-
-				 "Registration completed!"],
+				 'Ok, this is the info you type:\n\nName: {}\nPaypal: {}\n',
+				 'Is this info is correct?',
+				 'Registeration completed!'],
 		'buttons': [
 			[
 				{
-					'text': 'Name',
-					'callback_data': 'register?0',
+					'text': 'Yes',
+					'callback_data': 'register_complete',
 				},
 				{
-					'text': 'Paypal',
-					'callback_data': 'register?1',
-				}
-			],
-			[
-				{
-					'text': 'Description',
-					'callback_data': 'register?2',
-				}
-			],
-			[
-				{
-					'text': 'Save',
-					'callback_data': 'register_complete',
-				}
-			],
-			[
-				{
-					'text': 'Back',
-					'callback_data': 'back',
+					'text': 'No',
+					'callback_data': 'register',
 				}
 			],
 		],

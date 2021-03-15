@@ -150,6 +150,9 @@ def menu(message):
 		collection.insert_one(user)
 
 	collection.update_one({'_id': userId}, {'$set': {'path': 'menu'}})
+	user = colleciton.find_one({'_id': userId})
+	if checkRegistration(message, user):
+		return
 
 	keyboard = create_keyboard(messages.menu.buttons, [empty_key, empty_key])
 	bot.send_message(userId, messages.menu.text, reply_markup=keyboard)
@@ -164,7 +167,7 @@ def checkRegistration(message, user):
 		path = collection.find_one({'_id': userId})['path']
 		path = previous(path) + '/register'
 		collection.update_one({'_id': userId}, {'$set': {'path': path}})
-		register(message, ['9'])
+		register(message)
 		return True
 	return False
 
@@ -597,67 +600,92 @@ def create_new_gig_complete(message):
 
 ## REGISTERATION SYSTEM ##
 
-def register(message, value):
+def register(message):
 	userId = message.chat.id
-	user = collection.find_one({'_id': userId})
-	path = user['path']
-
-	if value[0] == '0': # Name
-		msgg = bot.send_message(userId, messages.register.text[1])
-		bot.register_next_step_handler(msgg, process_register_step)
-		return
-	elif value[0] == '1': # Paypal account
-		msgg = bot.send_message(userId, messages.register.text[2])
-		bot.register_next_step_handler(msgg, process_register_step)
-		return
-	elif value[0] == '2': # Profile Description
-		msgg = bot.send_message(userId, messages.register.text[3])
-		bot.register_next_step_handler(msgg, process_register_step)
-		return
-
-	collection.update_one({'_id': userId}, {'$set': {'path': previous(path)}})
-
-	keyboard = create_keyboard(messages.register.buttons, [empty_key, empty_key, empty_key, empty_key, empty_key])
-
-	user = collection.find_one({'_id': userId})
-	bot.send_message(userId, messages.register.text[0].format(user['name'], user['paypal_account'], user['profile_desc']), reply_markup=keyboard)
-
-def process_register_step(message):
-	text = message.text
+	bot.send_message(userId, messages.register.text[0])
+	msg = bot.send_message(userId, messages.register.text[1])
+	bot.register_next_step_handler(msg, process_register_step_get_name)
+def process_register_step_get_name(message):
 	userId = message.chat.id
+	collection.update_one({'_id': userId}, {'$set': {'name': message.text}})
+	msg = bot.send_message(userId, messages.register.text[2])
+	bot.register_next_step_handler(msg, register_complete)
+def register_last_step(message):
+	userId = message.chat.id
+	collection.update_one({'_id': userId}, {'$set': {'paypal_account': message.text}})
 
 	user = collection.find_one({'_id': userId})
-	[query, value] = calc(re.search(r'\w+(|\?[^\/]+)$', user['path'])[0])
-	print(query, value, user['path'])
-	if value[0] == '0': # Name
-		collection.update_one({'_id': userId}, {'$set': {'name': text}})
-	elif value[0] == '1': # Paypal account
-		collection.update_one({'_id': userId}, {'$set': {'paypal_account': text}})
-	elif value[0] == '2': # Profile Description
-		collection.update_one({'_id': userId}, {'$set': {'profile_desc': text}})
+	bot.send_message(userId, messages.register.text[3].format(user['name'], user['paypal_account']))
 
-	register(message, ['9'])
-
+	keyboard = create_keyboard(messages.register.buttons, [empty_key, empty_key])
+	bot.send_message(userId, messages.register.text[4], reply_markup=keyboard)
 def register_complete(message):
 	userId = message.chat.id
-
-	print(message)
-
-	user = collection.find_one({'_id': userId})
-	if user['name'] == '' or user['paypal_account'] == '':
-		bot.send_message('Fill in your profile')
-		register(message, ['9'])
-		return
-	val = {
-		'path': 'menu',
-		'username': message.chat.username,
-		'registered': True,
-	}
-	collection.update_one({'_id': userId}, {'$set': val}) # set profile description
-
-	bot.send_message(userId, messages.register.text[4])
-
+	collection.update_one({'_id': userId}, {'$set': {'path': 'menu','username': message.chat.username,'registered': True}}) # set profile description
+	bot.send_message(userId, messages.register.text[5])
 	menu(message)
+
+# def register(message, value):
+# 	userId = message.chat.id
+# 	user = collection.find_one({'_id': userId})
+# 	path = user['path']
+
+# 	if value[0] == '0': # Name
+# 		msgg = bot.send_message(userId, messages.register.text[1])
+# 		bot.register_next_step_handler(msgg, process_register_step)
+# 		return
+# 	elif value[0] == '1': # Paypal account
+# 		msgg = bot.send_message(userId, messages.register.text[2])
+# 		bot.register_next_step_handler(msgg, process_register_step)
+# 		return
+# 	elif value[0] == '2': # Profile Description
+# 		msgg = bot.send_message(userId, messages.register.text[3])
+# 		bot.register_next_step_handler(msgg, process_register_step)
+# 		return
+
+# 	collection.update_one({'_id': userId}, {'$set': {'path': previous(path)}})
+
+# 	keyboard = create_keyboard(messages.register.buttons, [empty_key, empty_key, empty_key, empty_key, empty_key])
+
+# 	user = collection.find_one({'_id': userId})
+# 	bot.send_message(userId, messages.register.text[0].format(user['name'], user['paypal_account'], user['profile_desc']), reply_markup=keyboard)
+
+# def process_register_step(message):
+# 	text = message.text
+# 	userId = message.chat.id
+
+# 	user = collection.find_one({'_id': userId})
+# 	[query, value] = calc(re.search(r'\w+(|\?[^\/]+)$', user['path'])[0])
+# 	print(query, value, user['path'])
+# 	if value[0] == '0': # Name
+# 		collection.update_one({'_id': userId}, {'$set': {'name': text}})
+# 	elif value[0] == '1': # Paypal account
+# 		collection.update_one({'_id': userId}, {'$set': {'paypal_account': text}})
+# 	elif value[0] == '2': # Profile Description
+# 		collection.update_one({'_id': userId}, {'$set': {'profile_desc': text}})
+
+# 	register(message, ['9'])
+
+# def register_complete(message):
+# 	userId = message.chat.id
+
+# 	print(message)
+
+# 	user = collection.find_one({'_id': userId})
+# 	if user['name'] == '' or user['paypal_account'] == '':
+# 		bot.send_message('Fill in your profile')
+# 		register(message, ['9'])
+# 		return
+# 	val = {
+# 		'path': 'menu',
+# 		'username': message.chat.username,
+# 		'registered': True,
+# 	}
+# 	collection.update_one({'_id': userId}, {'$set': val}) # set profile description
+
+# 	bot.send_message(userId, messages.register.text[4])
+
+# 	menu(message)
 ############################
 
 def calc(query):

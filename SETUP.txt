@@ -1,0 +1,47 @@
+1) Getting all necicery links to config.py
+
+!) Getting TOKEN:
+	To get TOKEN you have to create a telegram bot through bot father, when created bot father will give you a token
+
+!) Getting URI:
+	When creating a new mongodb cluster you will recieve your URI
+	Watch the video till 4:50 (how to setup mongodb): https://www.youtube.com/watch?v=rE_bJl2GAY8&t=1109s
+
+!) Getting URL:
+	Have a server, running your url, if you don't have it follow this steps:
+		!) Get "heroku CLI" installed
+		!!) Register to heroku
+		!!!) Create a new app in your dashboard
+		!!!) For reference watch this video to setup python app onto heroku (You don't need to setup virtual environment show in the video just paste the commands written in the deploy app section): https://www.youtube.com/watch?v=n1P8B53CCxs
+		!!!!) In settings scroll down to find a given URL
+!) Getting CLIENT_ID and CLIENT_SECRET
+	Watch the video how to setup paypal, it will show you how to craete an app where you get your CLIENT_ID and CLIENT SECRET:
+	https://www.youtube.com/watch?v=UEJHSPM-Qiw
+
+!) Change your CURRENCY to your (ILS) currency
+
+If everything is right the bot must work
+
+
+
+
+!) To change text messages, go to config.py file and CHANGE ONLY TEXT THAT HAS A KEY "TEXT" example:
+...
+{
+	'text': "CHANGE THIS TEXT",
+	'buttons': [
+		...
+	]
+}
+...
+
+If it is an array:
+
+...
+{
+	'text': ["CHANGE THIS TEXT", "CHANGE THIS TEXT"],
+	'buttons': [
+		...
+	]
+}
+...
