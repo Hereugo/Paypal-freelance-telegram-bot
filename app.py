@@ -110,6 +110,16 @@ def newId():
 def previous(path):
 	return re.search(r'(.+\/)+', path)[0][:-1]
 
+def checkRegistration(message):
+	userId = message.chat.id
+	if not user['registered']:
+		path = collection.find_one({'_id': userId})['path']
+		path = previous(path) + '/register'
+		collection.update_one({'_id': userId}, {'$set': {'path': path}})
+		register(message)
+		return True
+	return False
+
 def create_keyboard(arr, vals):
 	keyboard = InlineKeyboardMarkup()
 	i = 0
@@ -150,8 +160,7 @@ def menu(message):
 		collection.insert_one(user)
 
 	collection.update_one({'_id': userId}, {'$set': {'path': 'menu'}})
-	user = collection.find_one({'_id': userId})
-	if checkRegistration(message, user):
+	if checkRegistration(message):
 		return
 
 	keyboard = create_keyboard(messages.menu.buttons, [empty_key, empty_key])
@@ -161,22 +170,8 @@ def menu(message):
 def back(message):
 	callback_query(Map({'message': message, 'data': 'back'}))
 
-def checkRegistration(message, user):
-	userId = message.chat.id
-	if not user['registered']:
-		path = collection.find_one({'_id': userId})['path']
-		path = previous(path) + '/register'
-		collection.update_one({'_id': userId}, {'$set': {'path': path}})
-		register(message)
-		return True
-	return False
-
 def profile_buyer(message):
 	userId = message.chat.id
-	user = collection.find_one({'_id': userId})
-	if checkRegistration(message, user):
-		return
-
 	keyboard = create_keyboard(messages.profile_buyer.buttons, [empty_key, empty_key, empty_key])
 	bot.send_message(userId, messages.profile_buyer.text.format(user['name'], user['paypal_account']), reply_markup=keyboard)
 
@@ -279,10 +274,6 @@ def start_conversation(message, value):
 ####### SELLERS SYSTEM ########
 def profile_seller(message):
 	userId = message.chat.id
-	user = collection.find_one({'_id': userId})
-	if checkRegistration(message, user):
-		return
-
 	keyboard = create_keyboard(messages.profile_seller.buttons, [empty_key, empty_key, empty_key, empty_key, empty_key, empty_key])
 	bot.send_message(userId, messages.profile_seller.text.format(user['name'], user['paypal_account'], user['profile_desc']), reply_markup=keyboard)
 
