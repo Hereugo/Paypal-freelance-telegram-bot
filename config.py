@@ -337,6 +337,7 @@ messages = Map({
 				 'Please type the price for this gig',
 				 'Ok, this is the info you type:\n\nTitle:{}\n\nDescription:{}\n\n Price:{} '+CURRENCY,
 				 'Your price need only contains numbers! like this: 14. Please type again...',
+				 'Is this info is correct?',
 				 'Ok all good, your token for this gig is: {}\nPlease give this token to the buyer. Please note that after the buyer accept your order you have 2 days to supply the gig.',
 				 'Gig has been saved!'],
 		'buttons': [

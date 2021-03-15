@@ -110,6 +110,13 @@ def newId():
 def previous(path):
 	return re.search(r'(.+\/)+', path)[0][:-1]
 
+def RepresentsInt(s):
+    try: 
+        int(s)
+        return True
+    except ValueError:
+        return False
+
 def checkRegistration(message, user):
 	userId = message.chat.id
 	if not user['registered']:
@@ -541,10 +548,8 @@ def process_create_new_gig_step_desc(message):
 	msg = bot.send_message(userId, messages.create_new_gig.text[3])
 	bot.register_next_step_handler(msg, process_create_new_gig_step_price)
 def process_create_new_gig_step_price(message):
-	try:
-		price = int(message.text)
-	except:
-		msg = bot.send_message(userId, messages.create_new_gig.text[6])
+	if not RepresentsInt(message.text):
+		msg = bot.send_message(userId, messages.create_new_gig.text[5])
 		bot.register_next_step_handler(msg, process_create_new_gig_step_price)
 		return
 	collection.update_one({'_id': userId}, {'$set': {'process_gig.price': message.text}})
@@ -553,7 +558,7 @@ def process_create_new_gig_step_price(message):
 	bot.send_message(userId, messages.create_new_gig.text[4].format(gig['title'], gig['desc'], gig['price']))
 
 	keyboard = create_keyboard(messages.create_new_gig.buttons, [empty_key, empty_key])
-	bot.send_message(userId, messages.create_new_gig.text[5], reply_markup=keyboard)
+	bot.send_message(userId, messages.create_new_gig.text[6], reply_markup=keyboard)
 def create_new_gig_complete(message):
 	userId = message.chat.id
 
