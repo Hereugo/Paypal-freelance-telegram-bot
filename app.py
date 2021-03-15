@@ -150,7 +150,7 @@ def menu(message):
 		collection.insert_one(user)
 
 	collection.update_one({'_id': userId}, {'$set': {'path': 'menu'}})
-	user = colleciton.find_one({'_id': userId})
+	user = collection.find_one({'_id': userId})
 	if checkRegistration(message, user):
 		return
 
