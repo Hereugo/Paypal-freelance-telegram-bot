@@ -564,16 +564,12 @@ def create_new_gig_complete(message):
 	userId = message.chat.id
 
 	gig = collection.find_one({'_id': userId})['process_gig']
-	if gig['token'] != '#':
-		collection.update_one({'_id': userId, 'gigs.token': gig['token']}, {'$set': {'gigs.$.title': gig['title'], 'gigs.$.desc': gig['desc'], 'gigs.$.price': gig['price']}})
-	else:
-		gig['token'] = newId()
-		collection.update_one({'_id': userId}, {'$push': {'gigs': gig}})
+	gig['token'] = newId()
+	collection.update_one({'_id': userId}, {'$push': {'gigs': gig}})
+
 	# clear process_gig and change path
-	collection.update_one({'_id': userId}, {'$set': {'process_gig':{'title':"", 'desc':"", 'price':"", 'token':"#"}, 'path': 'menu/profile_seller'}})
 	bot.send_message(userId, messages.create_new_gig.text[7].format(gig['token']))
-	msg = bot.send_message(userId, messages.create_new_gig.text[8])
-	profile_seller(msg)
+	bot.send_message(userId, messages.create_new_gig.text[8])
 
 
 # def create_new_gig(message, value):
