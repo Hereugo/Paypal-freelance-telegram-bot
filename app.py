@@ -1,6 +1,8 @@
 import re
 import os
 import time
+from threading import Thread
+from time import sleep
 
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
@@ -585,8 +587,11 @@ def update_time():
 		else:
 			collection_times.update_one({'_id': time['_id']}, {'$set': {'duration': time['duration']}})
 
+def schedule_checker():
+    while True:
+        update_time()
+        sleep(TIME_STEP)
 
 if __name__ == "__main__":
-	T = InfiniteTimer(TIME_STEP, update_time)
-	T.start()
+	Thread(target=schedule_checker).start() 
 	app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
