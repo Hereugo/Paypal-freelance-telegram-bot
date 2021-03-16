@@ -588,6 +588,7 @@ def update_time():
 			collection_times.update_one({'_id': time['_id']}, {'$set': {'duration': time['duration']}})
 
 def schedule_checker():
+	print('ALKSDJLAKSJD')
     while True:
         update_time()
         sleep(TIME_STEP)
