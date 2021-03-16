@@ -67,9 +67,9 @@ def execute():
 			'buyer_id': uid2,
 			'seller_id': uid1,
 			'id': offer['id'],
-			'duration': int(offer['duration']),
+			'duration': '2',
 			'start_time': t,
-			'end_date': t + toSeconds(int(offer['duration']))
+			'end_date': t + toSeconds(int('2'))
 		})
 
 		print(order)
@@ -78,7 +78,6 @@ def execute():
 	else:
 		print(payment.error)
 		msg = bot.send_message(uid2, messages.payment_execute.text.buyer[0])
-	menu(msg)
 
 	return "Payment success!", 200
 
@@ -205,14 +204,13 @@ def create_offer(message, value):
 def create_offer_complete(message):
 	userId = message.chat.id
 
-
 	buyer = collection.find_one({'_id': userId})
 	offer = buyer['process_order']
 	seller = collection.find_one({'gigs.token': offer['token']})
 	print(offer)
 	print(seller, buyer)
 	collection.update_one({'_id': seller['_id']}, {'$push': {'offers': offer}}) # Send offer to seller
-	collection.update_one({'_id': userId}, {'$set': {'process_order': {'id': str(newId()), 'duration': "", 'token': '#'}}}) # Clear process order of buyer
+	collection.update_one({'_id': userId}, {'$set': {'process_order': {'id': str(newId()), 'token': '#'}}}) # Clear process order of buyer
 
 	bot.send_message(userId, messages.create_offer.text[2].format(seller['username']))
 	bot.send_message(seller['_id'], messages.create_offer.text[3].format(buyer['username']))
@@ -250,7 +248,8 @@ def orders(message, value):
 	vals = [[[''], [max(value[0] - 1, 0), value[1]]], 
 			[[''], [min(value[0] + 1, len(orders) - 1), value[1]]], 
 			[[''], [order['seller_id']], {'show': '1' if value[1] == 'buyer' else '2'}], 
-			[[''], [order['id']], {'show': '1' if value[1] == 'buyer' and order['status'] == 'pending' else '2'}], 
+			[[''], [order['id']], {'show': '1' if value[1] == 'buyer' and order['status'] == 'pending' else '2'}],
+			[[''], [order['id']], {'show': '1' if value[1] == 'buyer' and order['status'] == 'on hold' else '2'}],
 			[[''], [order['id']], {'show': '1' if value[1] == 'seller' and order['status'] != 'complete' else '2'}], 
 			empty_key]
 	keyboard = create_keyboard(messages.orders.buttons, vals)
@@ -274,10 +273,9 @@ def deliver_order(message, value):
 	collection.update_one({'seller_orders.id': value[0]}, {'$set': {'seller_orders.$.status': 'pending'}})
 	collection.update_one({'buyer_orders.id': value[0]}, {'$set': {'buyer_orders.$.status': 'pending'}})
 
-	keyboard = create_keyboard(messages.deliver_order.buttons, [[[''],[value[0]]], [[''],[value[0]]]])
+	keyboard = create_keyboard(messages.deliver_order.buttons, [[[''],[value[0]]], empty_key])
 	bot.send_message(order['buyer_id'], messages.deliver_order.text[0].format(value[0], seller['username']), reply_markup=keyboard)
 	bot.send_message(order['seller_id'], messages.deliver_order.text[1].format(buyer['username']))
-	menu(message)
 
 def deliver_order_complete(message, value):
 	userId = message.chat.id
@@ -319,16 +317,7 @@ def deliver_order_complete(message, value):
 		bot.send_message(seller['_id'], messages.deliver_order.text[3].seller[1])
 		print(payout.error)
 
-def deliver_order_decline(message, value):
-	userId = message.chat.id
-	seller = collection.find_one({'seller_orders.id': value[0]})
-	order = getFromArrDict(seller['seller_orders'], 'id', value[0])
-	buyer = collection.find_one({'_id': order['buyer_id']})
-
-	bot.send_message(buyer['_id'], messages.deliver_order.text[2].buyer[2])
-	bot.send_message(seller['_id'], messages.deliver_order.text[3].seller[2])
-
-def file_dispute(message, value):
+def file_dispute(message):
 	userId = message.chat.id
 	msg = bot.send_message(userId, messages.file_dispute.text.buyer[0])
 	bot.register_next_step_handler(msg, file_dispute_complete)
@@ -339,18 +328,37 @@ def file_dispute_complete(message):
 
 	buyer = collection.find_one({'_id': userId})
 	[query, value] = calc(re.search(r'\w+(|\?[^\/]+)$', buyer['path'])[0])
+
 	print(query, value, buyer['path'], 'buyer')
 	seller = collection.find_one({'seller_orders.id': value[0]})
 	order = getFromArrDict(seller['seller_orders'], 'id', value[0])
 
 	bot.send_message(seller['_id'], messages.file_dispute.text.seller[0].format(buyer['username']))
-	bot.send_message(seller['_id'], text)
+	bot.send_message(seller['_id'], messages.file_dispute.text.buyer[2].format(text))
 	bot.send_message(userId, messages.file_dispute.text.buyer[1].format(seller['username']))
 
 	collection.update_one({'seller_orders.id': value[0]}, {'$set': {'seller_orders.$.status': 'on hold'}})
 	collection.update_one({'_id': userId, 'buyer_orders.id': value[0]}, {'$set': {'buyer_orders.$.status': 'on hold'}})
 
 	collection_dispute.insert_one(order)
+
+def close_dispute(message):
+	userId = message.chat.id
+
+	buyer = collection.find_one({'_id': userId})
+	[query, value] = calc(re.search(r'\w+(|\?[^\/]+)$', buyer['path'])[0])
+
+	print(query, value, buyer['path'], 'buyer')
+	seller = collection.find_one({'seller_orders.id': value[0]})
+	order = getFromArrDict(seller['seller_orders'], 'id', value[0])
+
+	bot.send_message(seller['_id'], messages.close_dispute.text.seller[0].format(buyer['username'], value[0]))
+	bot.send_message(userId, messages.close_dispute.text.buyer[0].format(value[0]))
+
+	collection.update_one({'seller_orders.id': value[0]}, {'$set': {'seller_orders.$.status': 'pending'}})
+	collection.update_one({'_id': userId, 'buyer_orders.id': value[0]}, {'$set': {'buyer_orders.$.status': 'pending'}})
+
+	collection_dispute.delete_one(order)
 
 def offers(message, value):
 	userId = message.chat.id
@@ -374,13 +382,10 @@ def offers(message, value):
 	token = offers[value[0]]['token']
 	gig = getFromArrDict(collection.find_one({'gigs.token': token})['gigs'], 'token', token)
 
-	bot.send_message(userId, messages.offers.text[0].format(gig['title'], gig['desc'], gig['price'], offers[value[0]]['duration']), reply_markup=keyboard)
+	bot.send_message(userId, messages.offers.text[0].format(gig['title'], gig['desc'], gig['price']), reply_markup=keyboard)
 
 def accept_offer(message, value):
 	userId = message.chat.id
-
-	bot.send_message(userId, messages.offers.text[2])
-	menu(message)
 
 	seller = collection.find_one({'_id': userId})
 	offer = getFromArrDict(seller['offers'], 'id', value[0])
@@ -423,6 +428,7 @@ def accept_offer(message, value):
 			if link.rel == "approval_url":
 				approval_url = str(link.href)
 				print("Redirect for approval: %s" % (approval_url))
+				bot.send_message(userId, messages.offers.text[2].format(offer['customer']))
 				bot.send_message(offer['customer'], messages.offers.text[3].format(offer['id'], approval_url))
 	else:
 		bot.send_message(userId, messages.offers.text[4])

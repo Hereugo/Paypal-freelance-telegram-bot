@@ -86,7 +86,7 @@ messages = Map({
 			[
 				{
 					'text': 'Send',
-					'callback_data': 'create_offer_complete'
+					'callback_data': 'create_offer_complete',
 				},
 			],
 			[
@@ -164,7 +164,13 @@ messages = Map({
 			[
 				{
 					'text': 'File a dispute',
-					'callback_data': 'file_dispute?{}',
+					'callback_data': 'file_dispute',
+				}
+			],
+			[
+				{
+					'text': 'Close a dispute',
+					'callback_data': 'close_dispute',
 				}
 			],
 			[
@@ -183,10 +189,16 @@ messages = Map({
 	},
 	'file_dispute': {
 		'text': {
-			'buyer': ['Send what problem did your have',
-					  'Dispute was send to the seller @{}'],
-			'seller': ['@{} buyer has disputed the order, responed to the buyer in 24 hours',
-					   ],
+			'buyer': ['Please tell us what is your problem..',
+					  'Dispute was send to the seller @{}',
+					  'Dispute reason: {}'],
+			'seller': ['@{} buyer has disputed the order, responed to the buyer in 24 hours'],
+		}
+	},
+	'close_dispute': {
+		'text': {
+			'buyer': ['Dispute for order {} is closed'],
+			'seller': ['Buyer @{} closed the dispute for order {}'],
 		}
 	},
 	'deliver_order': {
@@ -211,16 +223,16 @@ messages = Map({
 			],
 			[
 				{
-					'text': 'Decline',
-					'callback_data': 'deliver_order_decline?{}',
+					'text': 'File a dispute',
+					'callback_data': 'file_dispute',
 				}
 			]
 		]
 	},
 	'offers': {
-		'text': ['Title: {}\n {}\n\n Price: {} '+CURRENCY+'\n Duration: {} days',
+		'text': ['Title: {}\n {}\n\n Price: {} '+CURRENCY+'\n Duration: 2 days',
 				 'No offers were found',
-				 'Wait for an order to start',
+				 'OK, waiting for @{} to pay the money. After successful payment the order will start',
 				 'Offer {} was accepted\n To begin this order pay using this link {}',
 				 'Something went wrong',
 
