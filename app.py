@@ -343,13 +343,12 @@ def file_dispute_complete(message):
 
 	collection_dispute.insert_one(order)
 
-def close_dispute(message):
+def close_dispute(message, value):
 	userId = message.chat.id
 
 	buyer = collection.find_one({'_id': userId})
-	[query, value] = calc(re.search(r'\w+(|\?[^\/]+)$', buyer['path'])[0])
 
-	print(query, value, buyer['path'], 'buyer')
+	print(value, buyer['path'], 'buyer')
 	seller = collection.find_one({'seller_orders.id': value[0]})
 	order = getFromArrDict(seller['seller_orders'], 'id', value[0])
 
