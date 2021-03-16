@@ -390,6 +390,7 @@ def accept_offer(message, value):
 	seller = collection.find_one({'_id': userId})
 	offer = getFromArrDict(seller['offers'], 'id', value[0])
 	gig = getFromArrDict(seller['gigs'], 'token', offer['token'])
+	buyer = collection.find_one({'_id': offer['customer']})
 
 
 	payment = Payment({
@@ -428,7 +429,7 @@ def accept_offer(message, value):
 			if link.rel == "approval_url":
 				approval_url = str(link.href)
 				print("Redirect for approval: %s" % (approval_url))
-				bot.send_message(userId, messages.offers.text[2].format(offer['customer']))
+				bot.send_message(userId, messages.offers.text[2].format(buyer['username']))
 				bot.send_message(offer['customer'], messages.offers.text[3].format(offer['id'], approval_url))
 	else:
 		bot.send_message(userId, messages.offers.text[4])
