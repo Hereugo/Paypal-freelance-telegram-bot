@@ -164,13 +164,13 @@ messages = Map({
 			[
 				{
 					'text': 'File a dispute',
-					'callback_data': 'file_dispute',
+					'callback_data': 'file_dispute?{}',
 				}
 			],
 			[
 				{
 					'text': 'Close a dispute',
-					'callback_data': 'close_dispute',
+					'callback_data': 'close_dispute?{}',
 				}
 			],
 			[
@@ -224,7 +224,7 @@ messages = Map({
 			[
 				{
 					'text': 'File a dispute',
-					'callback_data': 'file_dispute',
+					'callback_data': 'file_dispute?{}',
 				}
 			]
 		]
