@@ -1,8 +1,6 @@
 import re
 import os
 import time
-from threading import Thread
-from time import sleep
 
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
@@ -276,9 +274,6 @@ def deliver_order(message, value):
 	keyboard = create_keyboard(messages.deliver_order.buttons, [[[''],[value[0]]], [[''],[value[0]]]])
 	bot.send_message(order['buyer_id'], messages.deliver_order.text[0].format(value[0], seller['username']), reply_markup=keyboard)
 	bot.send_message(order['seller_id'], messages.deliver_order.text[1].format(buyer['username']))
-
-	# Set timer on 10 hours
-	collection_times.insert_one({'function_name': 'deliver_order_complete', 'duration': 10 * 60 * 60, 'args': [message, value[0]]})
 
 def deliver_order_complete(message, value):
 	userId = message.chat.id
@@ -587,13 +582,5 @@ def update_time():
 		else:
 			collection_times.update_one({'_id': time['_id']}, {'$set': {'duration': time['duration']}})
 
-def schedule_checker():
-	print('ALKSDJLAKSJD')
-	while True:
-		print('adsasdasdasda')
-		update_time()
-		sleep(TIME_STEP)
-
 if __name__ == "__main__":
-	Thread(target=schedule_checker).start() 
 	app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
