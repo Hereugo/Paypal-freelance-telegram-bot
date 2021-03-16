@@ -1,4 +1,6 @@
 import random
+import re
+import string
 class Map(dict):
     def __init__(self, *args, **kwargs):
         super(Map, self).__init__(*args, **kwargs)
