@@ -60,7 +60,7 @@ messages = Map({
 			[
 				{
 					'text': 'Create an offer',
-					'callback_data': 'create_offer',
+					'callback_data': 'create_offer?{}',
 				}
 			],
 			[

@@ -184,7 +184,7 @@ def process_search_order_step(message, token=""):
 	bot.send_message(userId, messages.search_order.text[1].format(gig['title'], gig['desc'], gig['price'], user['username']), reply_markup=keyboard)
 
 
-def create_offer(message):
+def create_offer(message, value):
 	userId = message.chat.id
 	seller = collection.find_one({'gigs.token': value[0]})
 
