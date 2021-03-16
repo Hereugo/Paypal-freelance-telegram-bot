@@ -1,3 +1,4 @@
+import random
 class Map(dict):
     def __init__(self, *args, **kwargs):
         super(Map, self).__init__(*args, **kwargs)
@@ -41,3 +42,28 @@ class Map(dict):
     def __delitem__(self, key):
         super(Map, self).__delitem__(key)
         del self.__dict__[key]
+
+def getFromArrDict(arr, name, val):
+    for x in arr:
+        if x[name] == val:
+            return x
+    return None
+
+def formatTime(x):
+    return '{} days {} hours {} minutes {} seconds'.format(x.tm_mday, x.tm_hour, x.tm_min, x.tm_sec) 
+
+def toSeconds(x):
+    return x * 24 * 60 * 60
+
+def newId():
+    return ''.join(random.choice(string.ascii_uppercase) for i in range(12))
+
+def previous(path):
+    return re.search(r'(.+\/)+', path)[0][:-1]
+
+def RepresentsInt(s):
+    try: 
+        int(s)
+        return True
+    except ValueError:
+        return False
