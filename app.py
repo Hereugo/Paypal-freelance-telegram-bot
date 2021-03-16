@@ -35,7 +35,7 @@ paypalrestsdk.configure({
 
 @app.route('/' + TOKEN, methods=['POST'])
 def getMessage():
-	bot.enable_save_next_step_handlers(delay=3)
+	bot.enable_save_next_step_handlers(delay=2)
 	bot.load_next_step_handlers()
 	bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
 	return "!", 200
@@ -564,23 +564,6 @@ def callback_query(call):
 		method(call.message)
 	else:
 		method(call.message, value)
-
-
-def update_time():
-	print('Hello')
-	timers = list(collection_times.find({}))
-	print(timers)
-	for time in timers:
-		#function_name, duration, args
-		time['duration'] -= TIME_STEP
-		if time['duration'] <= 0:
-			possibles = globals().copy()
-			possibles.update(locals())
-			method = possibles.get(time['function_name'])
-			method(*time['args'])
-			collection_times.delete_one({'_id': time['_id']})
-		else:
-			collection_times.update_one({'_id': time['_id']}, {'$set': {'duration': time['duration']}})
 
 if __name__ == "__main__":
 	app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
