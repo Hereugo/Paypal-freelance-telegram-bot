@@ -273,7 +273,7 @@ def deliver_order(message, value):
 	collection.update_one({'seller_orders.id': value[0]}, {'$set': {'seller_orders.$.status': 'pending'}})
 	collection.update_one({'buyer_orders.id': value[0]}, {'$set': {'buyer_orders.$.status': 'pending'}})
 
-	keyboard = create_keyboard(messages.deliver_order.buttons, [[[''],[value[0]]], empty_key])
+	keyboard = create_keyboard(messages.deliver_order.buttons, [[[''],[value[0]]], [[''],[value[0]]]])
 	bot.send_message(order['buyer_id'], messages.deliver_order.text[0].format(value[0], seller['username']), reply_markup=keyboard)
 	bot.send_message(order['seller_id'], messages.deliver_order.text[1].format(buyer['username']))
 
@@ -317,7 +317,7 @@ def deliver_order_complete(message, value):
 		bot.send_message(seller['_id'], messages.deliver_order.text[3].seller[1])
 		print(payout.error)
 
-def file_dispute(message):
+def file_dispute(message, value):
 	userId = message.chat.id
 	msg = bot.send_message(userId, messages.file_dispute.text.buyer[0])
 	bot.register_next_step_handler(msg, file_dispute_complete)
@@ -327,6 +327,7 @@ def file_dispute_complete(message):
 	userId = message.chat.id
 
 	buyer = collection.find_one({'_id': userId})
+	print(buyer['path'])
 	[query, value] = calc(re.search(r'\w+(|\?[^\/]+)$', buyer['path'])[0])
 
 	print(query, value, buyer['path'], 'buyer')
