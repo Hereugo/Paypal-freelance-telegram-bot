@@ -157,9 +157,7 @@ def search_order(message, value=-1):
 	userId = message.chat.id
 	
 	if value == -1:
-		keyboard = InlineKeyboardMarkup()
-		keyboard.add(InlineKeyboardButton('Back', callback_data='back'))
-		msg = bot.send_message(userId, messages.search_order.text[0], reply_markup=keyboard)
+		msg = bot.send_message(userId, messages.search_order.text[0])
 		bot.register_next_step_handler(msg, process_search_order_step)
 	else:
 		process_search_order_step(message, value[0])
@@ -172,7 +170,7 @@ def process_search_order_step(message, token=""):
 	if user == None:
 		keyboard = InlineKeyboardMarkup()
 		keyboard.add(InlineKeyboardButton('Back', callback_data='back'))
-		msg = bot.send_message(userId, 'Invalid token', reply_markup=keyboard)
+		bot.send_message(userId, 'Invalid token', reply_markup=keyboard)
 		return
 
 	gig = getFromArrDict(user['gigs'], 'token', token)
