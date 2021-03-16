@@ -1,3 +1,5 @@
+from functions import Map
+
 TOKEN = "1272925344:AAFO3V-DSpEcMYkfL8oMZ38Ei7JlAFIXr-o"
 URI = 'mongodb+srv://Amir:2LSCfSNcwAz9x3!@cluster0.jxsw1.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
 URL = 'https://paypal-telegram-fiverr-bot.herokuapp.com/'
@@ -253,52 +255,6 @@ messages = Map({
 			]
 		],
 	},
-	# 'gigs': {
-	# 	'text': ['No gigs were made',
-	# 			 'Title: {}\n\nDescription: {}\n\n Price: {} '+CURRENCY],
-	# 	'buttons': [
-	# 		[
-	# 			{
-	# 				'text': '<',
-	# 				'callback_data': 'gigs?{},{}',
-	# 			},
-	# 			{
-	# 				'text': '>',
-	# 				'callback_data': 'gigs?{},{}',
-	# 			}
-	# 		],
-	# 		[
-	# 			{
-	# 				'show': True,
-	# 				'text': 'Edit gig',
-	# 				'callback_data': 'edit_gig?9,{}',
-	# 			}
-	# 		],
-	# 		[
-	# 			{
-	# 				'text': 'Recieve token of this gig',
-	# 				'callback_data': 'token_reciever?{}',
-	# 			}
-	# 		],
-	# 		[
-	# 			{
-	# 				'text': 'Back',
-	# 				'callback_data': 'back',
-	# 			}
-	# 		]
-	# 	],
-	# },
-	'token_reciever': {
-		'text': '{}',
-		'buttons': [
-			[
-				{
-					'text': 'Back',
-					'callback_data': 'back',
-				}
-			]
-		],
-	},
 	'create_new_gig': {
 		'text': ['Ok, lets create new gig',
 				 'Please type the gig title',
@@ -321,9 +277,6 @@ messages = Map({
 				}
 			]
 		],
-	},
-	'delete_gig': {
-		'text': 'Gig has been deleted'
 	},
 	'register': {
 		'text': ['Register lets add some info about you',
