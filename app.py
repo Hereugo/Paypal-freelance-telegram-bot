@@ -589,9 +589,10 @@ def update_time():
 
 def schedule_checker():
 	print('ALKSDJLAKSJD')
-    while True:
-        update_time()
-        sleep(TIME_STEP)
+	while True:
+		print('adsasdasdasda')
+		update_time()
+		sleep(TIME_STEP)
 
 if __name__ == "__main__":
 	Thread(target=schedule_checker).start() 
