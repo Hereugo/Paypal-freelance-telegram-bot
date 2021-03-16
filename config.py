@@ -6,6 +6,7 @@ URL = 'https://paypal-telegram-fiverr-bot.herokuapp.com/'
 CLIENT_ID = "AW7Q6ChzzOnd5wa8OuYbiP5RiaqQ6tumVR7UTlMLaDIF_FXRhxo77BaNmjgQfKN6GBLK5c2rDHiijpHv"
 CLIENT_SECRET = "EBBmQczfJM6WrweaUE-NDMOxpBn__GH_RXtXQB1nwt8AN6doaa7MBEYuf3ok6EREj8AsrL7Eg7vSE4wM"
 CURRENCY = "USD"
+TIME_STEP = 5
 
 # PATH SYSTEM
 
@@ -202,7 +203,7 @@ messages = Map({
 		}
 	},
 	'deliver_order': {
-		'text': ['Order {} was completed by @{}, mark it complete to finish the order', 
+		'text': ['Order {} was completed by @{}, You have 10 hours to mark it complete to finish the order, or else the order will be automatically be marked completed', 
 				 'Wait for @{} to mark your order complete or decline',
 				 {
 				 	'buyer': ['Thank you for using our services!',

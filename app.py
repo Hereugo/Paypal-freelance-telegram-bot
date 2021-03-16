@@ -1,7 +1,6 @@
 import re
 import os
 import time
-import string
 
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
@@ -23,7 +22,7 @@ app = Flask(__name__)
 cluster = PyMongo(app, uri=URI)
 collection = cluster.db.user
 collection_dispute = cluster.db.dispute
-
+collection_times = cluster.db.time
 empty_key = [[''], ['']]
 
 # Paypal python sdk
@@ -147,6 +146,7 @@ def menu(message):
 def back(message):
 	callback_query(Map({'message': message, 'data': 'back'}))
 
+####### BUYERS SYSTEM ########
 def profile_buyer(message):
 	userId = message.chat.id
 	user = collection.find_one({'_id': userId})
@@ -260,7 +260,7 @@ def orders(message, value):
 			ctime = formatTime(time.gmtime(timeLeft))
 		else:
 			ctime = "LATE"
-	bot.send_message(userId, messages.orders.text[1].format(orders[value[0]]['status'], orders[value[0]]['title'], orders[value[0]]['desc'], orders[value[0]]['price'], orders[value[0]]['duration'], ctime), reply_markup=keyboard)
+	bot.send_message(userId, messages.orders.text[1].format(orders[value[0]]['status'], orders[value[0]]['title'], orders[value[0]]['desc'], orders[value[0]]['price'], ctime), reply_markup=keyboard)
 
 def deliver_order(message, value):
 	seller = collection.find_one({'seller_orders.id': value[0]})
@@ -274,6 +274,9 @@ def deliver_order(message, value):
 	keyboard = create_keyboard(messages.deliver_order.buttons, [[[''],[value[0]]], [[''],[value[0]]]])
 	bot.send_message(order['buyer_id'], messages.deliver_order.text[0].format(value[0], seller['username']), reply_markup=keyboard)
 	bot.send_message(order['seller_id'], messages.deliver_order.text[1].format(buyer['username']))
+
+	# Set timer on 10 hours
+	collection_times.insert_one({'function_name': 'deliver_order_complete', 'duration': 10 * 60 * 60, 'args': [message, value[0]]})
 
 def deliver_order_complete(message, value):
 	userId = message.chat.id
@@ -566,5 +569,23 @@ def callback_query(call):
 		method(call.message, value)
 
 
+def update_time():
+	print('Hello')
+	timers = list(collection_times.find({}))
+	print(timers)
+	for time in timers:
+		#function_name, duration, args
+		time['duration'] -= TIME_STEP
+		if time['duration'] <= 0:
+			possibles = globals().copy()
+			possibles.update(locals())
+			method = possibles.get(time['function_name'])
+			method(*time['args'])
+			collection_times.delete_one({'_id': time['_id']})
+		else:
+			collection_times.update_one({'_id': time['_id']}, {'$set': {'duration': time['duration']}})
+
+
 if __name__ == "__main__":
+	T = InfiniteTimer(TIME_STEP, update_time)
 	app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
