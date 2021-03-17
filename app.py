@@ -124,6 +124,10 @@ def menu(message):
 				'price':"", 
 				'token':"#",
 			},
+			
+			'function_name': "",
+			'use_function': False,
+
 			'process_order': {
 				'id': newId(),
 				'customer': '#',
@@ -146,6 +150,16 @@ def menu(message):
 def back(message):
 	callback_query(Map({'message': message, 'data': 'back'}))
 
+@bot.message_handler(func=lambda m: True)
+def receiver(message):
+	userId = message.chat.id
+	user = collection.find_one({'_id': userId})
+	if user['use_function']:
+		possibles = globals().copy()
+		possibles.update(locals())
+		method = possibles.get(user['function_name'])
+		method(message)
+
 ####### BUYERS SYSTEM ########
 def profile_buyer(message):
 	userId = message.chat.id
@@ -158,7 +172,8 @@ def search_order(message, value=-1):
 	
 	if value == -1:
 		msg = bot.send_message(userId, messages.search_order.text[0])
-		bot.register_next_step_handler(msg, process_search_order_step)
+		collection.update_one({'_id': userId}, {'$set': {'function_name': 'process_search_order_step', 'use_function': True}})
+		# bot.register_next_step_handler(msg, process_search_order_step)
 	else:
 		process_search_order_step(message, value[0])
 def process_search_order_step(message, token=""):
@@ -318,7 +333,8 @@ def deliver_order_complete(message, value):
 def file_dispute(message, value):
 	userId = message.chat.id
 	msg = bot.send_message(userId, messages.file_dispute.text.buyer[0])
-	bot.register_next_step_handler(msg, file_dispute_complete)
+	collection.update_one({'_id': userId}, {'$set': {'function_name': 'file_dispute_complete', 'use_function': True}})
+	# bot.register_next_step_handler(msg, file_dispute_complete)
 
 def file_dispute_complete(message):
 	text = message.text
@@ -450,12 +466,14 @@ def create_new_gig(message):
 	userId = message.chat.id
 	bot.send_message(userId, messages.create_new_gig.text[0])
 	msg = bot.send_message(userId, messages.create_new_gig.text[1])
-	bot.register_next_step_handler(msg, process_create_new_gig_step_title)
+	collection.update_one({'_id': userId}, {'$set': {'function_name': 'process_create_new_gig_step_title', 'use_function': True}})
+	# bot.register_next_step_handler(msg, process_create_new_gig_step_title)
 def process_create_new_gig_step_title(message):
 	userId = message.chat.id
 	collection.update_one({'_id': userId}, {'$set': {'process_gig.title': message.text}})
 	msg = bot.send_message(userId, messages.create_new_gig.text[2])
-	bot.register_next_step_handler(msg, process_create_new_gig_step_desc)
+	collection.update_one({'_id': userId}, {'$set': {'function_name': 'process_create_new_gig_step_desc', 'use_function': True}})
+	# bot.register_next_step_handler(msg, process_create_new_gig_step_desc)
 def process_create_new_gig_step_desc(message):
 	userId = message.chat.id
 	collection.update_one({'_id': userId}, {'$set': {'process_gig.desc': message.text}})
@@ -465,7 +483,8 @@ def process_create_new_gig_step_price(message):
 	userId = message.chat.id
 	if not RepresentsInt(message.text):
 		msg = bot.send_message(userId, messages.create_new_gig.text[5])
-		bot.register_next_step_handler(msg, process_create_new_gig_step_price)
+		collection.update_one({'_id': userId}, {'$set': {'function_name': 'process_create_new_gig_step_price', 'use_function': True}})
+		# bot.register_next_step_handler(msg, process_create_new_gig_step_price)
 		return
 	collection.update_one({'_id': userId}, {'$set': {'process_gig.price': message.text}})
 
@@ -474,12 +493,14 @@ def process_create_new_gig_step_price(message):
 
 	keyboard = create_keyboard(messages.create_new_gig.buttons, [empty_key, empty_key])
 	bot.send_message(userId, messages.create_new_gig.text[6], reply_markup=keyboard)
+
+
 def create_new_gig_complete(message):
 	userId = message.chat.id
 
 	gig = collection.find_one({'_id': userId})['process_gig']
 	gig['token'] = newId()
-	collection.update_one({'_id': userId}, {'$push': {'gigs': gig}})
+	collection.update_one({'_id': userId}, {'$push': {'gigs': gig}, '$set': {'function_name': '', 'use_function': False}})
 
 	# clear process_gig and change path
 	bot.send_message(userId, messages.create_new_gig.text[7].format(gig['token']))
@@ -491,12 +512,13 @@ def register(message):
 	userId = message.chat.id
 	bot.send_message(userId, messages.register.text[0])
 	msg = bot.send_message(userId, messages.register.text[1])
-	bot.register_next_step_handler(msg, process_register_step_get_name)
+	collection.update_one({'_id': userId}, {'$set': {'function_name': 'process_register_step_get_name', 'use_function': True}})
+	# bot.register_next_step_handler(msg, process_register_step_get_name)
 def process_register_step_get_name(message):
 	userId = message.chat.id
-	collection.update_one({'_id': userId}, {'$set': {'name': message.text}})
+	collection.update_one({'_id': userId}, {'$set': {'name': message.text, 'function_name': 'register_last_step', 'use_function': True}})
 	msg = bot.send_message(userId, messages.register.text[2])
-	bot.register_next_step_handler(msg, register_last_step)
+	# bot.register_next_step_handler(msg, register_last_step)
 def register_last_step(message):
 	userId = message.chat.id
 	collection.update_one({'_id': userId}, {'$set': {'paypal_account': message.text}})
@@ -508,7 +530,12 @@ def register_last_step(message):
 	bot.send_message(userId, messages.register.text[4], reply_markup=keyboard)
 def register_complete(message):
 	userId = message.chat.id
-	collection.update_one({'_id': userId}, {'$set': {'path': 'menu','username': message.chat.username,'registered': True}}) # set profile description
+	collection.update_one({'_id': userId}, {'$set': {
+		'path': 'menu',
+		'username': message.chat.username,
+		'registered': True,
+		'function_name': '', 
+		'use_function': False}}) # set profile description
 	bot.send_message(userId, messages.register.text[5])
 	menu(message)
 
