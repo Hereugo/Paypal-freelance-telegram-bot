@@ -353,7 +353,7 @@ def file_dispute_complete(message):
 	bot.send_message(userId, messages.file_dispute.text.buyer[1].format(seller['username']))
 
 	collection.update_one({'seller_orders.id': value[0]}, {'$set': {'seller_orders.$.status': 'on hold'}})
-	collection.update_one({'_id': userId, 'buyer_orders.id': value[0]}, {'$set': {'buyer_orders.$.status': 'on hold'}})
+	collection.update_one({'_id': userId, 'buyer_orders.id': value[0]}, {'$set': {'buyer_orders.$.status': 'on hold', 'function_name': 'file_dispute_complete', 'use_function': True}})
 
 	collection_dispute.insert_one(order)
 
