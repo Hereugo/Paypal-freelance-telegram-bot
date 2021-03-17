@@ -476,9 +476,9 @@ def process_create_new_gig_step_title(message):
 	# bot.register_next_step_handler(msg, process_create_new_gig_step_desc)
 def process_create_new_gig_step_desc(message):
 	userId = message.chat.id
-	collection.update_one({'_id': userId}, {'$set': {'process_gig.desc': message.text}})
+	collection.update_one({'_id': userId}, {'$set': {'process_gig.desc': message.text, 'function_name': 'process_create_new_gig_step_price', 'use_function': True}})
 	msg = bot.send_message(userId, messages.create_new_gig.text[3])
-	bot.register_next_step_handler(msg, process_create_new_gig_step_price)
+	# bot.register_next_step_handler(msg, process_create_new_gig_step_price)
 def process_create_new_gig_step_price(message):
 	userId = message.chat.id
 	if not RepresentsInt(message.text):
