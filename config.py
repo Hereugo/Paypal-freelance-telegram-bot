@@ -18,7 +18,6 @@ TEMPLATE_MESSAGE = ("I'm the bot for create and manage your gigs, you can contro
 					"/back - go back to previous message\n")
 
 # PATH SYSTEM
-
 messages = Map({
 	'payment_execute': {
 		'text': {

@@ -425,6 +425,7 @@ def accept_offer(message, value):
 				bot.send_message(userId, messages.offers.text[2].format(buyer['username']))
 				bot.send_message(offer['customer'], messages.offers.text[3].format(offer['id'], approval_url))
 	else:
+		print(payment.error)
 		bot.send_message(userId, messages.offers.text[4])
 
 def decline_offer(message, value):
