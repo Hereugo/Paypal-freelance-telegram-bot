@@ -401,7 +401,7 @@ def accept_offer(message, value):
 					'items': [
 						{
 							'name': gig['title'],
-							'sku': "WHAT IS IT SKU",
+							'sku': "SKU",
 							'price': '{}'.format(gig['price']),
 							'currency': CURRENCY,
 							'quantity': 1
