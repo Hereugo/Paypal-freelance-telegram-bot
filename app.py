@@ -447,24 +447,20 @@ def create_new_gig(message):
 	bot.send_message(userId, messages.create_new_gig.text[0])
 	msg = bot.send_message(userId, messages.create_new_gig.text[1])
 	collection.update_one({'_id': userId}, {'$set': {'function_name': 'process_create_new_gig_step_title', 'use_function': True}})
-	# bot.register_next_step_handler(msg, process_create_new_gig_step_title)
 def process_create_new_gig_step_title(message):
 	userId = message.chat.id
 	collection.update_one({'_id': userId}, {'$set': {'process_gig.title': message.text}})
 	msg = bot.send_message(userId, messages.create_new_gig.text[2])
 	collection.update_one({'_id': userId}, {'$set': {'function_name': 'process_create_new_gig_step_desc', 'use_function': True}})
-	# bot.register_next_step_handler(msg, process_create_new_gig_step_desc)
 def process_create_new_gig_step_desc(message):
 	userId = message.chat.id
 	collection.update_one({'_id': userId}, {'$set': {'process_gig.desc': message.text, 'function_name': 'process_create_new_gig_step_price', 'use_function': True}})
 	msg = bot.send_message(userId, messages.create_new_gig.text[3])
-	# bot.register_next_step_handler(msg, process_create_new_gig_step_price)
 def process_create_new_gig_step_price(message):
 	userId = message.chat.id
 	if not RepresentsInt(message.text):
 		msg = bot.send_message(userId, messages.create_new_gig.text[5])
 		collection.update_one({'_id': userId}, {'$set': {'function_name': 'process_create_new_gig_step_price', 'use_function': True}})
-		# bot.register_next_step_handler(msg, process_create_new_gig_step_price)
 		return
 	collection.update_one({'_id': userId}, {'$set': {'process_gig.price': message.text}})
 
@@ -492,12 +488,10 @@ def register(message):
 	bot.send_message(userId, messages.register.text[0])
 	msg = bot.send_message(userId, messages.register.text[1])
 	collection.update_one({'_id': userId}, {'$set': {'function_name': 'process_register_step_get_name', 'use_function': True}})
-	# bot.register_next_step_handler(msg, process_register_step_get_name)
 def process_register_step_get_name(message):
 	userId = message.chat.id
 	collection.update_one({'_id': userId}, {'$set': {'name': message.text, 'function_name': 'register_last_step', 'use_function': True}})
 	msg = bot.send_message(userId, messages.register.text[2])
-	# bot.register_next_step_handler(msg, register_last_step)
 def register_last_step(message):
 	userId = message.chat.id
 	collection.update_one({'_id': userId}, {'$set': {'paypal_account': message.text}})
