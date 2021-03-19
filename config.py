@@ -2,10 +2,10 @@ from functions import Map
 
 TOKEN = "1272925344:AAFO3V-DSpEcMYkfL8oMZ38Ei7JlAFIXr-o"
 URI = 'mongodb+srv://Amir:2LSCfSNcwAz9x3!@cluster0.jxsw1.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
-URL = 'https://paypal-telegram-fiverr-bot.herokuapp.com/'
+URL = 'https://paypal-telegram-fiverr-bot.herokuapp.com/' # Don't forget to add '/'' at the end your URL 
 CLIENT_ID = "AW7Q6ChzzOnd5wa8OuYbiP5RiaqQ6tumVR7UTlMLaDIF_FXRhxo77BaNmjgQfKN6GBLK5c2rDHiijpHv"
 CLIENT_SECRET = "EBBmQczfJM6WrweaUE-NDMOxpBn__GH_RXtXQB1nwt8AN6doaa7MBEYuf3ok6EREj8AsrL7Eg7vSE4wM"
-CURRENCY = "USD"
+CURRENCY = "ILS"
 
 
 TEMPLATE_MESSAGE = ("I'm the bot for create and manage your gigs, you can control me by sending those commends:\n"
@@ -43,7 +43,7 @@ messages = Map({
 		]
 	},
 	'profile_buyer': {
-		'text': "PROFILE\n\nName {}\nPaypal: {}\n",
+		'text': "PROFILE\n\nName: {}\nPaypal: {}\n",
 		'buttons': [
 			[
 				{
@@ -85,7 +85,8 @@ messages = Map({
 		'text': ['Cant make an offer to yourself',
 				 '{}\n\n{}\n\nPrice: {} '+CURRENCY+'\n\nUser: @{}\nDuration: 2 days',
 				 'Offer has been sent, wait for a seller @{} to confirm',
-				 'New offer from @{}'],
+				 'New offer from @{}',
+				 'Something went wrong'],
 		'buttons': [
 			[
 				{
@@ -147,7 +148,7 @@ messages = Map({
 	},
 	'orders': {
 		'text': ['No current orders',
-				 'Project status: {}\n\nTitle: {}\n {}\n\n Price: {} '+CURRENCY+'\n Time left: {}'],
+				 'Project status: {}\n\nTitle: {}\n\n {}\n\n Price: {} '+CURRENCY+'\n Time left: {}'],
 		'buttons': [
 			[
 				{

@@ -216,15 +216,8 @@ def create_offer_complete(message):
 	collection.update_one({'_id': userId}, {'$set': {'process_order': {'id': str(newId()), 'token': '#'}}}) # Clear process order of buyer
 
 	bot.send_message(userId, messages.create_offer.text[2].format(seller['username']))
-	bot.send_message(seller['_id'], messages.create_offer.text[3].format(buyer['username']))
-
-def see_profile(message, value):
-	userId = message.chat.id
-	user = collection.find_one({'_id': int(value[0])})
-
-	keyboard = create_keyboard(messages.see_profile.buttons, [empty_key])
-	bot.send_message(userId, messages.see_profile.text.format(user['username'], user['name'], user['paypal_account']), reply_markup=keyboard)
-
+	msg = bot.send_message(seller['_id'], messages.create_offer.text[3].format(buyer['username']))
+	offers(msg, [str(len(seller['offers']) - 1)])
 ####### SELLERS SYSTEM ########
 def profile_seller(message):
 	userId = message.chat.id
@@ -233,7 +226,7 @@ def profile_seller(message):
 	bot.send_message(userId, messages.profile_seller.text.format(user['name'], user['paypal_account']), reply_markup=keyboard)
 
 @bot.message_handler(commands=['orders'])
-def orders(message, value):
+def orders(message, value=['0','seller']):
 	userId = message.chat.id
 	try:	
 		orders = collection.find_one({'_id': userId})['{}_orders'.format(value[1])]
@@ -409,7 +402,7 @@ def accept_offer(message, value):
 						{
 							'name': gig['title'],
 							'sku': "WHAT IS IT SKU",
-							'price': '{}.00'.format(gig['price']),
+							'price': '{}'.format(gig['price']),
 							'currency': CURRENCY,
 							'quantity': 1
 						}
@@ -523,7 +516,6 @@ def register_complete(message):
 		'function_name': '', 
 		'use_function': False}}) # set profile description
 	bot.send_message(userId, messages.register.text[5])
-	menu(message)
 
 def calc(query):
 	value = -1
