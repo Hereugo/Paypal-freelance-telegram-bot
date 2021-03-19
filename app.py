@@ -167,6 +167,7 @@ def profile_buyer(message):
 	keyboard = create_keyboard(messages.profile_buyer.buttons, [empty_key, empty_key, empty_key])
 	bot.send_message(userId, messages.profile_buyer.text.format(user['name'], user['paypal_account']), reply_markup=keyboard)
 
+@bot.message_handler(commands=['searchorders'])
 def search_order(message, value=-1):
 	userId = message.chat.id
 	
@@ -213,7 +214,6 @@ def create_offer(message, value):
 
 	keyboard = create_keyboard(messages.create_offer.buttons, [empty_key, empty_key])
 	bot.send_message(userId, messages.create_offer.text[1].format(gig['title'], gig['desc'], gig['price'], seller['username']), reply_markup=keyboard)
-
 def create_offer_complete(message):
 	userId = message.chat.id
 
@@ -242,6 +242,7 @@ def profile_seller(message):
 	keyboard = create_keyboard(messages.profile_seller.buttons, [empty_key, empty_key, empty_key, empty_key, empty_key])
 	bot.send_message(userId, messages.profile_seller.text.format(user['name'], user['paypal_account']), reply_markup=keyboard)
 
+@bot.message_handler(commands=['orders'])
 def orders(message, value):
 	userId = message.chat.id
 	try:	
@@ -276,7 +277,6 @@ def orders(message, value):
 		else:
 			ctime = "LATE"
 	bot.send_message(userId, messages.orders.text[1].format(orders[value[0]]['status'], orders[value[0]]['title'], orders[value[0]]['desc'], orders[value[0]]['price'], ctime), reply_markup=keyboard)
-
 def deliver_order(message, value):
 	seller = collection.find_one({'seller_orders.id': value[0]})
 	
@@ -289,7 +289,6 @@ def deliver_order(message, value):
 	keyboard = create_keyboard(messages.deliver_order.buttons, [[[''],[value[0]]], [[''],[value[0]]]])
 	bot.send_message(order['buyer_id'], messages.deliver_order.text[0].format(value[0], seller['username']), reply_markup=keyboard)
 	bot.send_message(order['seller_id'], messages.deliver_order.text[1].format(buyer['username']))
-
 def deliver_order_complete(message, value):
 	userId = message.chat.id
 	seller = collection.find_one({'seller_orders.id': value[0]})
@@ -335,7 +334,6 @@ def file_dispute(message, value):
 	msg = bot.send_message(userId, messages.file_dispute.text.buyer[0])
 	collection.update_one({'_id': userId}, {'$set': {'function_name': 'file_dispute_complete', 'use_function': True}})
 	# bot.register_next_step_handler(msg, file_dispute_complete)
-
 def file_dispute_complete(message):
 	text = message.text
 	userId = message.chat.id
@@ -356,7 +354,6 @@ def file_dispute_complete(message):
 	collection.update_one({'_id': userId, 'buyer_orders.id': value[0]}, {'$set': {'buyer_orders.$.status': 'on hold', 'function_name': 'file_dispute_complete', 'use_function': True}})
 
 	collection_dispute.insert_one(order)
-
 def close_dispute(message, value):
 	userId = message.chat.id
 
@@ -374,7 +371,8 @@ def close_dispute(message, value):
 
 	collection_dispute.delete_one(order)
 
-def offers(message, value):
+@bot.message_handler(commands=['offers'])
+def offers(message, value=['0']):
 	userId = message.chat.id
 	try:	
 		offers = collection.find_one({'_id': userId})['offers']
@@ -397,7 +395,6 @@ def offers(message, value):
 	gig = getFromArrDict(collection.find_one({'gigs.token': token})['gigs'], 'token', token)
 
 	bot.send_message(userId, messages.offers.text[0].format(gig['title'], gig['desc'], gig['price']), reply_markup=keyboard)
-
 def accept_offer(message, value):
 	userId = message.chat.id
 
@@ -405,7 +402,6 @@ def accept_offer(message, value):
 	offer = getFromArrDict(seller['offers'], 'id', value[0])
 	gig = getFromArrDict(seller['gigs'], 'token', offer['token'])
 	buyer = collection.find_one({'_id': offer['customer']})
-
 
 	payment = Payment({
 		'intent': 'sale',
@@ -462,6 +458,7 @@ def decline_offer(message, value):
 	bot.send_message(offer['customer'], messages.offers.text[6].format(seller['username']))
 
 ## CREATE NEW GIG SYSTEM ##
+@bot.message_handler(commands=['createnewgig'])
 def create_new_gig(message):
 	userId = message.chat.id
 	bot.send_message(userId, messages.create_new_gig.text[0])
@@ -493,8 +490,6 @@ def process_create_new_gig_step_price(message):
 
 	keyboard = create_keyboard(messages.create_new_gig.buttons, [empty_key, empty_key])
 	bot.send_message(userId, messages.create_new_gig.text[6], reply_markup=keyboard)
-
-
 def create_new_gig_complete(message):
 	userId = message.chat.id
 
@@ -507,7 +502,7 @@ def create_new_gig_complete(message):
 	bot.send_message(userId, messages.create_new_gig.text[8])
 
 ## REGISTERATION SYSTEM ##
-
+@bot.message_handler(commands=['editprofile'])
 def register(message):
 	userId = message.chat.id
 	bot.send_message(userId, messages.register.text[0])
@@ -570,6 +565,8 @@ def back(message):
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
+	bot.delete_message(call.message.chat.id, call.message.message_id)
+
 	userId = call.message.chat.id
 	path = collection.find_one({'_id': userId})['path']
 
