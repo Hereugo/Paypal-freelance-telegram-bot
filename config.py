@@ -6,7 +6,16 @@ URL = 'https://paypal-telegram-fiverr-bot.herokuapp.com/'
 CLIENT_ID = "AW7Q6ChzzOnd5wa8OuYbiP5RiaqQ6tumVR7UTlMLaDIF_FXRhxo77BaNmjgQfKN6GBLK5c2rDHiijpHv"
 CLIENT_SECRET = "EBBmQczfJM6WrweaUE-NDMOxpBn__GH_RXtXQB1nwt8AN6doaa7MBEYuf3ok6EREj8AsrL7Eg7vSE4wM"
 CURRENCY = "USD"
-TIME_STEP = 5
+
+
+TEMPLATE_MESSAGE = ("I'm the bot for create and manage your gigs, you can control me by sending those commends:\n"
+					"/start - start the bot\n"
+					"/createnewgig - Create new gig\n"
+					"/editprofile - Edit your profile\n"
+					"/orders - See all your orders\n"
+					"/offers - See all your offers\n"
+					"/searchorder - Search order\n"
+					"/back - go back to previous message\n")
 
 # PATH SYSTEM
 
@@ -62,12 +71,6 @@ messages = Map({
 				{
 					'text': 'Create an offer',
 					'callback_data': 'create_offer?{}',
-				}
-			],
-			[
-				{
-					'text': 'See Profile',
-					'callback_data': 'see_profile?{}',
 				}
 			],
 			[
@@ -276,7 +279,9 @@ messages = Map({
 				 'Ok, this is the info you type:\n\nTitle:{}\n\nDescription:{}\n\n Price:{} '+CURRENCY,
 				 'Your price need only contains numbers! like this: 14. Please type again...',
 				 'Is this info is correct?',
-				 'Ok all good, your token for this gig is: \n<code>{}</code>\nPlease give this token to the buyer. Please note that after the buyer accept your order you have 2 days to supply the gig.',
+				 'Ok all good, your token for this gig is:',
+				 '<code>{}</code>',
+				 'Please give this token to the buyer. Please note that after the buyer accept your order you have 2 days to supply the gig.',
 				 'Gig has been saved!'],
 		'buttons': [
 			[

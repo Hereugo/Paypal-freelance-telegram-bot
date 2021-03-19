@@ -65,7 +65,7 @@ def previous(path):
 
 def RepresentsInt(s):
     try: 
-        int(s)
+        float(s)
         return True
     except ValueError:
         return False

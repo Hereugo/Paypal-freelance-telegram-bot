@@ -11,7 +11,7 @@ from paypalrestsdk import Payment, Payout
 from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
 
-from config import TOKEN, messages, URI, URL, CLIENT_ID, CLIENT_SECRET, CURRENCY
+from config import *
 from functions import *
 
 # Telebot
@@ -488,8 +488,9 @@ def create_new_gig_complete(message):
 	collection.update_one({'_id': userId}, {'$push': {'gigs': gig}, '$set': {'function_name': '', 'use_function': False}})
 
 	# clear process_gig and change path
-	bot.send_message(userId, messages.create_new_gig.text[7].format(gig['token']), parse_mode='html')
-	bot.send_message(userId, messages.create_new_gig.text[8])
+	bot.send_message(userId, messages.create_new_gig.text[7])
+	bot.send_message(userId, messages.create_new_gig.text[8].format(gig['token']), parse_mode='html')
+	bot.send_message(userId, messages.create_new_gig.text[9])
 
 ## REGISTERATION SYSTEM ##
 @bot.message_handler(commands=['editprofile'])
@@ -562,6 +563,8 @@ def receiver(message):
 		possibles.update(locals())
 		method = possibles.get(user['function_name'])
 		method(message)
+	else:
+		bot.send_message(userId, TEMPLATE_MESSAGE)
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
