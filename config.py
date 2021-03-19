@@ -5,7 +5,7 @@ URI = 'mongodb+srv://Amir:2LSCfSNcwAz9x3!@cluster0.jxsw1.mongodb.net/myFirstData
 URL = 'https://paypal-telegram-fiverr-bot.herokuapp.com/' # Don't forget to add '/'' at the end your URL 
 CLIENT_ID = "AW7Q6ChzzOnd5wa8OuYbiP5RiaqQ6tumVR7UTlMLaDIF_FXRhxo77BaNmjgQfKN6GBLK5c2rDHiijpHv"
 CLIENT_SECRET = "EBBmQczfJM6WrweaUE-NDMOxpBn__GH_RXtXQB1nwt8AN6doaa7MBEYuf3ok6EREj8AsrL7Eg7vSE4wM"
-CURRENCY = "USD"
+CURRENCY = "ISL"
 
 
 TEMPLATE_MESSAGE = ("I'm the bot for create and manage your gigs, you can control me by sending those commends:\n"
