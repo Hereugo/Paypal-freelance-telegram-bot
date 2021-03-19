@@ -150,16 +150,6 @@ def menu(message):
 def back(message):
 	callback_query(Map({'message': message, 'data': 'back'}))
 
-@bot.message_handler(func=lambda m: True)
-def receiver(message):
-	userId = message.chat.id
-	user = collection.find_one({'_id': userId})
-	if user['use_function']:
-		possibles = globals().copy()
-		possibles.update(locals())
-		method = possibles.get(user['function_name'])
-		method(message)
-
 ####### BUYERS SYSTEM ########
 def profile_buyer(message):
 	userId = message.chat.id
@@ -498,7 +488,7 @@ def create_new_gig_complete(message):
 	collection.update_one({'_id': userId}, {'$push': {'gigs': gig}, '$set': {'function_name': '', 'use_function': False}})
 
 	# clear process_gig and change path
-	bot.send_message(userId, messages.create_new_gig.text[7].format(gig['token']))
+	bot.send_message(userId, messages.create_new_gig.text[7].format(gig['token']), parse_mode='html')
 	bot.send_message(userId, messages.create_new_gig.text[8])
 
 ## REGISTERATION SYSTEM ##
@@ -562,6 +552,16 @@ def back(message):
 		method(message)
 	else:
 		method(message, value)
+
+@bot.message_handler(func=lambda m: True)
+def receiver(message):
+	userId = message.chat.id
+	user = collection.find_one({'_id': userId})
+	if user['use_function']:
+		possibles = globals().copy()
+		possibles.update(locals())
+		method = possibles.get(user['function_name'])
+		method(message)
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
