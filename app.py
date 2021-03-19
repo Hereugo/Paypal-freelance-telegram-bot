@@ -409,7 +409,7 @@ def accept_offer(message, value):
 					]
 				},
 				'amount': {
-					'total': '{}.00'.format(gig['price']),
+					'total': '{}'.format(gig['price']),
 					'currency': CURRENCY
 				},
 				'description': '{}\n\n Duration: {} days#{}#{}#{}'.format(gig['desc'], offer['duration'], seller['_id'], offer['customer'], offer['id']),
