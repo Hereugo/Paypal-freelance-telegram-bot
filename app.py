@@ -68,7 +68,7 @@ def execute():
 			'id': offer['id'],
 			'duration': '2',
 			'start_time': t,
-			'end_date': t + toSeconds(int('2'))
+			'end_date': t + toSeconds(2)
 		})
 
 		print(order)
@@ -164,7 +164,6 @@ def search_order(message, value=-1):
 	if value == -1:
 		msg = bot.send_message(userId, messages.search_order.text[0])
 		collection.update_one({'_id': userId}, {'$set': {'function_name': 'process_search_order_step', 'use_function': True}})
-		# bot.register_next_step_handler(msg, process_search_order_step)
 	else:
 		process_search_order_step(message, value[0])
 def process_search_order_step(message, token=""):
@@ -270,7 +269,7 @@ def deliver_order(message, value):
 	collection.update_one({'buyer_orders.id': value[0]}, {'$set': {'buyer_orders.$.status': 'pending'}})
 
 	keyboard = create_keyboard(messages.deliver_order.buttons, [[[''],[value[0]]], [[''],[value[0]]]])
-	bot.send_message(order['buyer_id'], messages.deliver_order.text[0].format(value[0], seller['username']), reply_markup=keyboard)
+	bot.send_message(order['buyer_id'], messages.deliver_order.text[0].format(value[0], seller['username']), reply_markup=keyboard, parse_mode='html')
 	bot.send_message(order['seller_id'], messages.deliver_order.text[1].format(buyer['username']))
 def deliver_order_complete(message, value):
 	userId = message.chat.id
@@ -346,7 +345,7 @@ def close_dispute(message, value):
 	seller = collection.find_one({'seller_orders.id': value[0]})
 	order = getFromArrDict(seller['seller_orders'], 'id', value[0])
 
-	bot.send_message(seller['_id'], messages.close_dispute.text.seller[0].format(buyer['username'], value[0]))
+	bot.send_message(seller['_id'], messages.close_dispute.text.seller[0].format(buyer['username'], value[0]), parse_mode='html')
 	bot.send_message(userId, messages.close_dispute.text.buyer[0].format(value[0]))
 
 	collection.update_one({'seller_orders.id': value[0]}, {'$set': {'seller_orders.$.status': 'pending'}})

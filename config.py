@@ -1,11 +1,21 @@
 from functions import Map
 
-TOKEN = "1272925344:AAFO3V-DSpEcMYkfL8oMZ38Ei7JlAFIXr-o"
-URI = 'mongodb+srv://Amir:2LSCfSNcwAz9x3!@cluster0.jxsw1.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
-URL = 'https://paypal-telegram-fiverr-bot.herokuapp.com/' # Don't forget to add '/'' at the end your URL 
-CLIENT_ID = "AW7Q6ChzzOnd5wa8OuYbiP5RiaqQ6tumVR7UTlMLaDIF_FXRhxo77BaNmjgQfKN6GBLK5c2rDHiijpHv"
-CLIENT_SECRET = "EBBmQczfJM6WrweaUE-NDMOxpBn__GH_RXtXQB1nwt8AN6doaa7MBEYuf3ok6EREj8AsrL7Eg7vSE4wM"
+TOKEN = ""
+print(TOKEN)
+URI = ''
+URL = '' # Don't forget to add '/'' at the end your URL 
+CLIENT_ID = ""
+CLIENT_SECRET = ""
 CURRENCY = "ILS"
+
+# Go to /setcommands in botfather then add these commands you can change the description
+# start - start bot
+# back - go back
+# searchorders - search order
+# orders - see all orders
+# offers - see all offers
+# createnewgig - create new gig
+# editprofile - edit profile
 
 
 TEMPLATE_MESSAGE = ("I'm the bot for create and manage your gigs, you can control me by sending those commends:\n"
@@ -202,11 +212,11 @@ messages = Map({
 	'close_dispute': {
 		'text': {
 			'buyer': ['Dispute for order {} is closed'],
-			'seller': ['Buyer @{} closed the dispute for order {}'],
+			'seller': ['Buyer @{} closed the dispute for order <code>{}</code>'],
 		}
 	},
 	'deliver_order': {
-		'text': ['Order {} was completed by @{}, You have 10 hours to mark it complete to finish the order, or else the order will be automatically be marked completed', 
+		'text': ['Order <code>{}</code> was completed by @{}, You have 10 hours to mark it complete to finish the order, or else the order will be automatically be marked completed', 
 				 'Wait for @{} to mark your order complete or decline',
 				 {
 				 	'buyer': ['Thank you for using our services!',
